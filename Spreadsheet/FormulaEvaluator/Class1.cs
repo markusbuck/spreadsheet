@@ -1,7 +1,9 @@
-﻿namespace FormulaEvaluator;
-
-public class Class1
+﻿namespace FormulaEvaluator
 {
 
-}
+    public static class Evaluator
+    {
+        // TODO: Follow the PS1 instructions
+    }
 
+}
