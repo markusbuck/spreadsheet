@@ -11,33 +11,53 @@ namespace FormulaEvaluator
         {
             string[] substrings = Regex.Split(exp, "(\\()|(\\))|(-)|(\\+)|(\\*)|(/)");
 
-            Stack<int> value = new Stack<int>();
+            Stack<int> values = new Stack<int>();
             Stack<string> operators = new Stack<string>();
 
-            foreach(String t in substrings)
+            foreach (String t in substrings)
             {
+                String s = t.Trim();
                 // if t is an integer
-                if (int.TryParse(t, out int operand1)){
-                    String topOfStack = operators.Peek();
-                    if (operators.Count > 0 && topOfStack == "*" || topOfStack == "/")
+                if (int.TryParse(s, out int operand1)) {
+                    if (operators.Count > 0 && operators.Peek() == "*" || operators.Peek() == "/")
                     {
-                        if(value.Count > 0)
+                        if (values.Count > 0)
                         {
-                            int operand2 = value.Pop();
+                            int operand2 = values.Pop();
                             string sign = operators.Pop();
 
-                            value.Push(MultiplyOrDivide(operand1, operand2, sign));
+                            values.Push(MultiplyOrDivide(operand1, operand2, sign));
                         }
                     }
                     else
                     {
-                        value.Push(operand1);
+                        values.Push(operand1);
                     }
                 }
+                // add if t is a variable
 
 
+                // if t is a plus or minus
+                else if (s == "+" || s == "-")
+                {
+                    if (operators.Count > 0 && operators.Peek() == "+" || operators.Peek() == "-")
+                    {
+                        if (values.Count >= 2)
+                        {
+                            int addend2 = values.Pop();
+                            int addend1 = values.Pop();
+                            string sign = operators.Pop();
+
+                            values.Push(AddOrSubtract(addend1, addend2, sign));
+                        }
+                        else
+                        {
+                            throw new ArgumentException("Invalid number of values");
+                        }
+                    }
+                }
             }
-            return value.Pop();
+            return values.Pop();
         }
 
         private static int MultiplyOrDivide(int num1, int num2, string sign)
@@ -61,6 +81,18 @@ namespace FormulaEvaluator
             return product;
         }
 
+        private static int AddOrSubtract(int num1, int num2, string sign)
+        {
+            int product = 0;
+            if (sign == "+")
+            {
+                product = num2 + num1;
+            }
+            if (sign == "-")
+            {
+                product = num1 - num2;
+            }
+            return product;
+        }
     }
-
 }
