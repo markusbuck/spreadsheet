@@ -25,17 +25,8 @@ namespace FormulaEvaluator
                         {
                             int operand2 = value.Pop();
                             string sign = operators.Pop();
-                            int product = 0;
-                            if(sign == "*")
-                            {
-                                product = operand2 * operand1;
-                            }
-                            if(sign == "/")
-                            {
-                                product = operand2 / operand1;
-                            }
-                            value.Push(product);
-                            
+
+                            value.Push(MultiplyOrDivide(operand1, operand2, sign));
                         }
                     }
                     else
@@ -43,8 +34,31 @@ namespace FormulaEvaluator
                         value.Push(operand1);
                     }
                 }
+
+
             }
-            return 1;
+            return value.Pop();
+        }
+
+        private static int MultiplyOrDivide(int num1, int num2, string sign)
+        {
+            int product = 0;
+            if (sign == "*")
+            {
+                product = num2 * num1;
+            }
+            if (sign == "/")
+            {
+                if (num1 == 0)
+                {
+                    throw new ArgumentException("Cannot Divide by Zero");
+                }
+                else
+                {
+                    product = num2 / num1;
+                }
+            }
+            return product;
         }
 
     }

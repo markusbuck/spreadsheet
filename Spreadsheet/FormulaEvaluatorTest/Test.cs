@@ -1,10 +1,11 @@
 ﻿namespace FormulaEvaluatorTest;
 
-class Program
+class Test
 {
     static void Main(string[] args)
     {
-        Console.WriteLine("Hello, World!");
+        Console.WriteLine("Test for Eval");
+
+
     }
 }
-
