@@ -2,7 +2,6 @@
 
 namespace FormulaEvaluator
 {
-
     public static class Evaluator
     {
         public delegate int Lookup(String v);
@@ -16,6 +15,7 @@ namespace FormulaEvaluator
 
             foreach (string t in substrings)
             {
+                int i = variableEvaluator(t);
                 string s = t.Trim();
                 // if t is an integer
                 if (int.TryParse(s, out int operand1)) {
@@ -27,6 +27,10 @@ namespace FormulaEvaluator
                             string sign = operators.Pop();
 
                             values.Push(MultiplyOrDivide(operand1, operand2, sign));
+                        }
+                        else
+                        {
+                            throw new ArgumentException("Invalid number of values");
                         }
                     }
                     else
@@ -59,6 +63,10 @@ namespace FormulaEvaluator
                 else if(s == "*" || s == "/" || s == "(")
                 {
                     operators.Push(s);
+                }
+                else if(s == ")")
+                {
+
                 }
 
             }
@@ -99,6 +107,15 @@ namespace FormulaEvaluator
             }
             return product;
         }
-    }
 
+        private static bool IsVariable(string t)
+        {
+            char[] charArray = t.ToCharArray();
+            foreach(char c in charArray)
+            {
+
+            }
+
+        }
+    }
 }
