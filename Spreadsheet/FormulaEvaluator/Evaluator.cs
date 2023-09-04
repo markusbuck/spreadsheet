@@ -14,9 +14,9 @@ namespace FormulaEvaluator
             Stack<int> values = new Stack<int>();
             Stack<string> operators = new Stack<string>();
 
-            foreach (String t in substrings)
+            foreach (string t in substrings)
             {
-                String s = t.Trim();
+                string s = t.Trim();
                 // if t is an integer
                 if (int.TryParse(s, out int operand1)) {
                     if (operators.Count > 0 && operators.Peek() == "*" || operators.Peek() == "/")
@@ -56,6 +56,11 @@ namespace FormulaEvaluator
                         }
                     }
                 }
+                else if(s == "*" || s == "/" || s == "(")
+                {
+                    operators.Push(s);
+                }
+
             }
             return values.Pop();
         }
@@ -95,4 +100,5 @@ namespace FormulaEvaluator
             return product;
         }
     }
+
 }
