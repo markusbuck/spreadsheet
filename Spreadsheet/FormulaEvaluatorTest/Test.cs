@@ -1,17 +1,35 @@
 ﻿using FormulaEvaluator;
 namespace FormulaEvaluatorTest;
 
+/// <summary>
+/// Class used to test the formula evaluator program
+/// </summary>
 class Test
 {
+    /// <summary>
+    /// Empty Lookup method used to call the evaluate method.
+    /// </summary>
+    /// <param name="s"></param>
+    /// <returns> int = 0 </returns>
     public static int LookUpNoVar(String s)
     {
         return 0;
     }
 
+    /// <summary>
+    /// Lookup method used to evaluate given variables, this method just returns
+    /// one number instead of actually looking up values.
+    /// </summary>
+    /// <param name="s"></param>
+    /// <returns> int = 1</returns>
     public static int LookUpWithVar(String s)
     {
         return 1;
     }
+    /// <summary>
+    /// Main method that contains tests for the evaluate program. 
+    /// </summary>
+    /// <param name="args"></param>
     static void Main(string[] args)
     {
         Console.WriteLine("Test for Eval");
@@ -75,6 +93,6 @@ class Test
         //Console.WriteLine("Test no values, should return exception, actual value: " + Evaluator.Evaluate("()", LookUpNoVar));
         //Console.WriteLine("Test for negative numbers, should return an exception, actual: " + Evaluator.Evaluate("-30 + 12 ", LookUpNoVar));
         //Console.WriteLine("Test for invalid parenthesis, should return Exception, actual: " + Evaluator.Evaluate("30) + 12 + 3 + 5 ", LookUpNoVar));
-        Console.WriteLine("Test for improper additions, should return exception, actual: " + Evaluator.Evaluate("30 + 12 + 3 +  ", LookUpNoVar));
+        //Console.WriteLine("Test for improper additions, should return exception, actual: " + Evaluator.Evaluate("30 + 12 + 3 +  ", LookUpNoVar));
     }
 }

@@ -2,10 +2,28 @@
 
 namespace FormulaEvaluator
 {
+    /// <summary>
+    /// This class provides an evaluator for infix expressions
+    /// </summary>
     public static class Evaluator
     {
+        /// <summary>
+        /// This delegate sets up a method that can be passed into another method parameter in
+        /// order to find the value of a variable.
+        /// </summary>
+        /// <param name="v"></param>
+        /// <returns> an int</returns>
         public delegate int Lookup(String v);
 
+        /// <summary>
+        /// This method does the evaluation of the passed in infix expression which is given as a string
+        /// the method passed into this method will be used to lookup the value of a variable in the expression. Will throw
+        /// multiple exceptions for a number of different reasons. 
+        /// </summary>
+        /// <param name="exp"></param>
+        /// <param name="variableEvaluator"></param>
+        /// <returns> an int value of the expression </returns>
+        /// <exception cref="ArgumentException"></exception>
         public static int Evaluate(String exp, Lookup variableEvaluator)
         {
             string[] substrings = Regex.Split(exp, "(\\()|(\\))|(-)|(\\+)|(\\*)|(/)");
@@ -144,6 +162,15 @@ namespace FormulaEvaluator
             return values.Pop();
         }
 
+        /// <summary>
+        /// Private helper method used to complete the multiplication or division needed
+        /// in the evaluate method. Throws an exception if a user tries to divide by zero. 
+        /// </summary>
+        /// <param name="num1"></param>
+        /// <param name="num2"></param>
+        /// <param name="sign"></param>
+        /// <returns> result of the two values being multiplied or divided </returns>
+        /// <exception cref="ArgumentException"></exception>
         private static int MultiplyOrDivide(int num1, int num2, string sign)
         {
             int product = 0;
@@ -165,6 +192,13 @@ namespace FormulaEvaluator
             return product;
         }
 
+        /// <summary>
+        /// A private helper method used to complete the addition or subtraction in the evaluate method.
+        /// </summary>
+        /// <param name="num1"></param>
+        /// <param name="num2"></param>
+        /// <param name="sign"></param>
+        /// <returns> the result of two values being added or subtracted </returns>
         private static int AddOrSubtract(int num1, int num2, string sign)
         {
             int product = 0;
@@ -179,6 +213,12 @@ namespace FormulaEvaluator
             return product;
         }
 
+        /// <summary>
+        /// Private helper method used to tell if a given string is a variable with the proper format. 
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns> a boolean value of whether or not the given string is a variable </returns>
+        /// <exception cref="ArgumentException"></exception>
         private static bool IsVariable(string t)
         {
            
