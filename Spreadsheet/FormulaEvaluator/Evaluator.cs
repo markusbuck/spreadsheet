@@ -19,7 +19,7 @@ namespace FormulaEvaluator
                 string s = t.Trim();
                 // if t is an integer
                 if (int.TryParse(s, out int operand1)) {
-                    if (operators.Count > 0 && operators.Peek() == "*" || operators.Peek() == "/")
+                    if (operators.Count > 0 && (operators.Peek() == "*" || operators.Peek() == "/"))
                     {
                         if (values.Count > 0)
                         {
@@ -39,12 +39,35 @@ namespace FormulaEvaluator
                     }
                 }
                 // add if t is a variable
+                else if (IsVariable(s))
+                {
+                    operand1 = variableEvaluator(t);
+
+                    if (operators.Count > 0 && (operators.Peek() == "*" || operators.Peek() == "/"))
+                    {
+                        if (values.Count > 0)
+                        {
+                            int operand2 = values.Pop();
+                            string sign = operators.Pop();
+
+                            values.Push(MultiplyOrDivide(operand1, operand2, sign));
+                        }
+                        else
+                        {
+                            throw new ArgumentException("Invalid number of values");
+                        }
+                    }
+                    else
+                    {
+                        values.Push(operand1);
+                    }
+                }
 
 
                 // if t is a plus or minus
                 else if (s == "+" || s == "-")
                 {
-                    if (operators.Count > 0 && operators.Peek() == "+" || operators.Peek() == "-")
+                    if (operators.Count > 0 && (operators.Peek() == "+" || operators.Peek() == "-"))
                     {
                         if (values.Count >= 2)
                         {
@@ -60,6 +83,7 @@ namespace FormulaEvaluator
                         }
                     }
                 }
+                // if t is an operator
                 else if(s == "*" || s == "/" || s == "(")
                 {
                     operators.Push(s);
@@ -110,12 +134,25 @@ namespace FormulaEvaluator
 
         private static bool IsVariable(string t)
         {
+           
             char[] charArray = t.ToCharArray();
-            foreach(char c in charArray)
+            if (char.IsLetter(charArray[0]))
             {
-
+                bool LettersRemain = true;
+                foreach (char c in charArray)
+                {
+                    if (char.IsNumber(c))
+                    {
+                        LettersRemain = false;
+                    }
+                    if ((!char.IsLetterOrDigit(c)) || (char.IsLetter(c) && LettersRemain == false))
+                    {
+                        throw new ArgumentException("Invalid Varaiable Name");
+                    }
+                }
+                return true;
             }
-
+            return false;
         }
     }
 }
