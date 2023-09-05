@@ -15,9 +15,8 @@ namespace FormulaEvaluator
 
             foreach (string t in substrings)
             {
-                int i = variableEvaluator(t);
                 string s = t.Trim();
-                // if t is an integer
+                
                 if (int.TryParse(s, out int operand1)) {
                     if (operators.Count > 0 && (operators.Peek() == "*" || operators.Peek() == "/"))
                     {
@@ -29,16 +28,15 @@ namespace FormulaEvaluator
                             values.Push(MultiplyOrDivide(operand1, operand2, sign));
                         }
                         else
-                        {
+                        
                             throw new ArgumentException("Invalid number of values");
-                        }
+                        
                     }
                     else
-                    {
+                    
                         values.Push(operand1);
-                    }
+                   
                 }
-                // add if t is a variable
                 else if (IsVariable(s))
                 {
                     operand1 = variableEvaluator(t);
@@ -58,13 +56,8 @@ namespace FormulaEvaluator
                         }
                     }
                     else
-                    {
                         values.Push(operand1);
-                    }
                 }
-
-
-                // if t is a plus or minus
                 else if (s == "+" || s == "-")
                 {
                     if (operators.Count > 0 && (operators.Peek() == "+" || operators.Peek() == "-"))
@@ -78,22 +71,76 @@ namespace FormulaEvaluator
                             values.Push(AddOrSubtract(addend1, addend2, sign));
                         }
                         else
-                        {
                             throw new ArgumentException("Invalid number of values");
-                        }
                     }
+                    operators.Push(s);
                 }
-                // if t is an operator
-                else if(s == "*" || s == "/" || s == "(")
+                else if (s == "*" || s == "/" || s == "(")
                 {
                     operators.Push(s);
                 }
-                else if(s == ")")
+                else if (s == ")")
                 {
+                    if(operators.Count > 0 && (operators.Peek() == "+" || operators.Peek() == "-"))
+                    {
+                        if (values.Count >= 2)
+                        {
+                            int addend2 = values.Pop();
+                            int addend1 = values.Pop();
+                            string sign = operators.Pop();
 
+                            values.Push(AddOrSubtract(addend1, addend2, sign));
+                        }
+                        else                   
+                            throw new ArgumentException("Invalid number of values");                       
+                    }
+                    if (operators.Count == 0 || (operators.Pop() != "("))
+                    {
+                        throw new ArgumentException("Inavlid use of paranthesis");
+                    }
+                    if (operators.Count > 0 && (operators.Peek() == "*" || operators.Peek() == "/"))
+                    {
+                        if (values.Count >= 2)
+                        {
+                            int value = values.Pop();
+                            int operand = values.Pop();
+                            string sign = operators.Pop();
+
+                            values.Push(MultiplyOrDivide(operand, value, sign));
+                        }
+                        else
+                            throw new ArgumentException("Invalid number of values");
+                    }
                 }
 
             }
+            if(operators.Count > 0)
+            {
+                if (operators.Count != 1)
+                    throw new ArgumentException("Invalid number of Operators remain");
+                if (operators.Peek() == "+" || operators.Peek() == "-")
+                {
+                    if (values.Count == 2)
+                    {
+                        int addend2 = values.Pop();
+                        int addend1 = values.Pop();
+                        string sign = operators.Pop();
+
+                        return AddOrSubtract(addend1, addend2, sign);
+                    }
+                    else
+                        throw new ArgumentException("Invalid number of Values");
+                  
+                }
+                else
+                    throw new ArgumentException("Invalid Operator Usage");
+            }
+            else
+            {
+                if (values.Count != 1)
+                    throw new ArgumentException("Invalid number of values remaining");
+            }
+
             return values.Pop();
         }
 
@@ -136,7 +183,7 @@ namespace FormulaEvaluator
         {
            
             char[] charArray = t.ToCharArray();
-            if (char.IsLetter(charArray[0]))
+            if (charArray.Length > 0 && (char.IsLetter(charArray[0])))
             {
                 bool LettersRemain = true;
                 foreach (char c in charArray)
@@ -147,7 +194,7 @@ namespace FormulaEvaluator
                     }
                     if ((!char.IsLetterOrDigit(c)) || (char.IsLetter(c) && LettersRemain == false))
                     {
-                        throw new ArgumentException("Invalid Varaiable Name");
+                        throw new ArgumentException("Incorrect Variable Name");
                     }
                 }
                 return true;
