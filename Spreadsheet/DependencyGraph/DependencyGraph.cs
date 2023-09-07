@@ -1,4 +1,6 @@
-﻿namespace SpreadsheetUtilities;
+﻿using System.Collections.Generic;
+
+namespace SpreadsheetUtilities;
 
 /// <summary>
 /// (s1,t1) is an ordered pair of strings
@@ -29,11 +31,19 @@
 /// </summary>
 public class DependencyGraph
 {
+
+    Dictionary<string, LinkedList<string>> dependents;
+    Dictionary<string, LinkedList<string>> dependees;
+    int orderedPairs;
+
     /// <summary>
     /// Creates an empty DependencyGraph.
     /// </summary>
     public DependencyGraph()
     {
+        dependents = new Dictionary<string, LinkedList<String>>();
+        dependees = new Dictionary<string, LinkedList<String>>();
+        orderedPairs = 0;
     }
 
 
@@ -43,7 +53,9 @@ public class DependencyGraph
     /// </summary>
     public int NumDependencies
     {
-        get { return 0; }
+        get {
+            return orderedPairs;
+        }
     }
 
 
@@ -53,7 +65,12 @@ public class DependencyGraph
     /// </summary>
     public int NumDependees(string s)
     {
-        return 0;
+        if (dependees.TryGetValue(s, out LinkedList<string> dependeeList))
+        {
+            return dependeeList.Count;
+        }
+        else
+            return 0;
     }
 
 
@@ -62,6 +79,13 @@ public class DependencyGraph
     /// </summary>
     public bool HasDependents(string s)
     {
+        if(dependents.TryGetValue(s, out LinkedList<string> dependentList))
+        {
+            if(dependentList.Count > 0)
+            {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -71,6 +95,13 @@ public class DependencyGraph
     /// </summary>
     public bool HasDependees(string s)
     {
+        if (dependees.TryGetValue(s, out LinkedList<string> dependeeList))
+        {
+            if (dependeeList.Count > 0)
+            {
+                return true;
+            }
+        }
         return false;
     }
 
