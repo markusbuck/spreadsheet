@@ -32,17 +32,17 @@ namespace SpreadsheetUtilities;
 public class DependencyGraph
 {
 
-    Dictionary<string, LinkedList<string>> dependents;
-    Dictionary<string, LinkedList<string>> dependees;
-    int orderedPairs;
+    private Dictionary<string, HashSet<string>> dependents;
+    private Dictionary<string, HashSet<string>> dependees;
+    private int orderedPairs;
 
     /// <summary>
     /// Creates an empty DependencyGraph.
     /// </summary>
     public DependencyGraph()
     {
-        dependents = new Dictionary<string, LinkedList<String>>();
-        dependees = new Dictionary<string, LinkedList<String>>();
+        dependents = new Dictionary<string, HashSet<string>>();
+        dependees = new Dictionary<string, HashSet<string>>();
         orderedPairs = 0;
     }
 
@@ -65,9 +65,9 @@ public class DependencyGraph
     /// </summary>
     public int NumDependees(string s)
     {
-        if (dependees.TryGetValue(s, out LinkedList<string> dependeeList))
+        if (dependees.TryGetValue(s, out HashSet<string> dependeeSet))
         {
-            return dependeeList.Count;
+            return dependeeSet.Count;
         }
         else
             return 0;
@@ -79,9 +79,9 @@ public class DependencyGraph
     /// </summary>
     public bool HasDependents(string s)
     {
-        if(dependents.TryGetValue(s, out LinkedList<string> dependentList))
+        if(dependents.TryGetValue(s, out HashSet<string> dependentSet))
         {
-            if(dependentList.Count > 0)
+            if(dependentSet.Count > 0)
             {
                 return true;
             }
@@ -95,9 +95,9 @@ public class DependencyGraph
     /// </summary>
     public bool HasDependees(string s)
     {
-        if (dependees.TryGetValue(s, out LinkedList<string> dependeeList))
+        if (dependees.TryGetValue(s, out HashSet<string> dependeeSet))
         {
-            if (dependeeList.Count > 0)
+            if (dependeeSet.Count > 0)
             {
                 return true;
             }
@@ -111,7 +111,11 @@ public class DependencyGraph
     /// </summary>
     public IEnumerable<string> GetDependents(string s)
     {
-        return null;
+        if (dependents.ContainsKey(s))
+        {
+            return dependents[s];
+        }
+        return new HashSet<string>();
     }
 
 
@@ -120,7 +124,11 @@ public class DependencyGraph
     /// </summary>
     public IEnumerable<string> GetDependees(string s)
     {
-        return null;
+        if (dependees.ContainsKey(s))
+        {
+            return dependees[s];
+        }
+        return new HashSet<string>();
     }
 
 
@@ -136,7 +144,31 @@ public class DependencyGraph
     /// <param name="t"> t cannot be evaluated until s is</param>
     public void AddDependency(string s, string t)
     {
-        /// write your code here
+        if (dependents.ContainsKey(s))
+        {
+            if (dependents[s].Add(t))
+            {
+                orderedPairs++;
+            }
+        }
+        else
+        {
+            HashSet<string> dependentSet = new HashSet<string>();
+            dependentSet.Add(t);
+            dependents.Add(s,dependentSet);
+            orderedPairs++;
+        }
+
+        if (dependees.ContainsKey(t))
+        {
+            dependees[t].Add(s);
+        }
+        else
+        {
+            HashSet<string> dependeeSet = new HashSet<string>();
+            dependeeSet.Add(s);
+            dependees.Add(t, dependeeSet);
+        }
     }
 
 
@@ -147,6 +179,27 @@ public class DependencyGraph
     /// <param name="t"></param>
     public void RemoveDependency(string s, string t)
     {
+        if (dependents.ContainsKey(s))
+        {
+            if (dependents[s].Remove(t))
+            {
+                orderedPairs--;
+            }
+            if (dependents[s].Count == 0)
+            {
+                dependents.Remove(s);
+            }
+        }
+        if (dependees.ContainsKey(t))
+        {
+            dependees[t].Remove(s);
+
+            if (dependees[t].Count == 0)
+            {
+                dependees.Remove(t);
+            }
+        }
+
     }
 
 
@@ -156,6 +209,18 @@ public class DependencyGraph
     /// </summary>
     public void ReplaceDependents(string s, IEnumerable<string> newDependents)
     {
+        if (dependents.ContainsKey(s))
+        {
+            foreach (string r in dependents[s])
+            {
+                RemoveDependency(s, r);
+            }
+        }
+
+        foreach(string t in newDependents)
+        {
+            AddDependency(s, t);
+        }
     }
 
 
@@ -165,5 +230,17 @@ public class DependencyGraph
     /// </summary>
     public void ReplaceDependees(string s, IEnumerable<string> newDependees)
     {
+        if (dependees.ContainsKey(s))
+        {
+            foreach (string r in dependees[s])
+            {
+                RemoveDependency(r, s);
+            }
+        }
+        foreach (string t in newDependees)
+        {
+            AddDependency(t, s);
+        }
+
     }
 }

@@ -66,6 +66,7 @@ public class DependencyGraphTest
         t.AddDependency("x", "y");
         Assert.AreEqual(t.NumDependencies, 1);
         t.RemoveDependency("x", "y");
+        Assert.AreEqual(t.NumDependencies, 0);
         t.ReplaceDependents("x", new HashSet<string>());
         t.ReplaceDependees("y", new HashSet<string>());
     }
