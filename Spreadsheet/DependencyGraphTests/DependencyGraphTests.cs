@@ -21,6 +21,111 @@ public class DependencyGraphTest
         Assert.AreEqual(0, t.NumDependencies);
     }
 
+    /// <summary>
+    /// Tests the add dependency method
+    /// </summary>
+    [TestMethod()]
+    public void SimpleAddTest()
+    {
+        DependencyGraph t = new DependencyGraph();
+        t.AddDependency("x", "y");
+        Assert.AreEqual(1, t.NumDependencies);
+    }
+
+    /// <summary>
+    /// Tests the add dependency with a duplicate 
+    /// </summary>
+    [TestMethod()]
+    public void DuplicateAddTest()
+    {
+        DependencyGraph t = new DependencyGraph();
+        t.AddDependency("x", "y");
+        Assert.AreEqual(1, t.NumDependencies);
+        t.AddDependency("x", "y");
+        Assert.AreEqual(1, t.NumDependencies);
+    }
+
+    /// <summary>
+    /// Tests the add depency with two of the same values just swapped places
+    /// </summary>
+    [TestMethod()]
+    public void AddTestSwapped()
+    {
+        DependencyGraph t = new DependencyGraph();
+        t.AddDependency("x", "y");
+        Assert.AreEqual(1, t.NumDependencies);
+        t.AddDependency("y", "x");
+        Assert.AreEqual(2, t.NumDependencies);
+    }
+
+    /// <summary>
+    /// Tests the add dependency method with the same starting node and different dependcenies
+    /// </summary>
+    [TestMethod()]
+    public void AddTestSamefirstvalue()
+    {
+        DependencyGraph t = new DependencyGraph();
+        t.AddDependency("x", "y");
+        Assert.AreEqual(1, t.NumDependencies);
+        t.AddDependency("x", "a");
+        Assert.AreEqual(2, t.NumDependencies);
+        t.AddDependency("x", "b");
+        Assert.AreEqual(3, t.NumDependencies);
+        t.AddDependency("x", "c");
+        Assert.AreEqual(4, t.NumDependencies);
+        t.AddDependency("x", "h");
+        Assert.AreEqual(5, t.NumDependencies);
+    }
+
+    /// <summary>
+    /// Tests the remove method when the two ordered pairs have the same dependee
+    /// </summary>
+    [TestMethod()]
+    public void TestRemoveWithSameFirstValue()
+    {
+        DependencyGraph t = new DependencyGraph();
+        t.AddDependency("x", "y");
+        t.AddDependency("x", "z");
+
+        Assert.AreEqual(2, t.NumDependencies);
+
+        t.RemoveDependency("x", "y");
+        Assert.AreEqual(1, t.NumDependencies);
+    }
+
+    /// <summary>
+    /// Tests Remove Dependency on pair that has not been added. 
+    /// </summary>
+    [TestMethod()]
+    public void TestRemoveWithInvalidPair()
+    {
+        DependencyGraph t = new DependencyGraph();
+        t.AddDependency("x", "y");
+        t.AddDependency("x", "z");
+
+        Assert.AreEqual(2, t.NumDependencies);
+
+        t.RemoveDependency("v", "y");
+        Assert.AreEqual(2, t.NumDependencies);
+    }
+
+    /// <summary>
+    /// Tests the remove method when the dependent is not in the set
+    /// </summary>
+    [TestMethod()]
+    public void TestRemoveWithInvalidDependent()
+    {
+        DependencyGraph t = new DependencyGraph();
+        t.AddDependency("x", "y");
+        t.AddDependency("x", "z");
+
+        Assert.AreEqual(2, t.NumDependencies);
+
+        t.RemoveDependency("x", "a");
+        Assert.AreEqual(2, t.NumDependencies);
+    }
+
+
 
     /// <summary>
     ///Empty graph should contain nothing
@@ -260,7 +365,9 @@ public class DependencyGraphTest
         }
     }
 
-    // Test the num dependees method works on a DG with valid values
+    /// <summary>
+    /// Test the num dependees method works on a DG with valid values
+    /// </summary>
     [TestMethod()]
     public void TestNumDependees()
     {
@@ -270,8 +377,10 @@ public class DependencyGraphTest
         Assert.AreEqual(t.NumDependees("n"), 1);
     }
 
-    //Tests num dependees when called on a string that is not contained in the
-    //dependee set
+    /// <summary>
+    /// Tests num dependees when called on a string that is not contained in the
+    /// dependee set
+    /// </summary>
     [TestMethod()]
     public void TestNumDependeesNoDependee()
     {
@@ -291,7 +400,9 @@ public class DependencyGraphTest
         Assert.IsTrue(t.HasDependents("m"));
     }
 
-    //Test the HasDependents method if the count of the dependents is zero
+    /// <summary>
+    /// Test the HasDependents method if the count of the dependents is zero
+    /// </summary>
     [TestMethod()]
     public void TestHasDependentsLessThan1()
     {
@@ -301,7 +412,9 @@ public class DependencyGraphTest
         Assert.IsFalse(t.HasDependents("n"));
     }
 
-    //Test the HasDependents method on string that hasn't been added to DG
+    /// <summary>
+    /// Test the HasDependents method on string that hasn't been added to DG
+    /// </summary>
     [TestMethod()]
     public void TestHasDependentsNoDependents()
     {
@@ -311,7 +424,9 @@ public class DependencyGraphTest
         Assert.IsFalse(t.HasDependents("z"));
     }
 
-    // Test the has dependents method if the count of dependents is greater than 0
+    /// <summary>
+    /// Test the has dependents method if the count of dependents is greater than 0
+    /// </summary>
     [TestMethod()]
     public void TestHasDependeees()
     {
@@ -321,7 +436,9 @@ public class DependencyGraphTest
         Assert.IsTrue(t.HasDependees("n"));
     }
 
-    //Test the HasDependees method if the count of the dependents is zero
+    /// <summary>
+    /// Test the HasDependees method if the count of the dependents is zero
+    /// </summary>
     [TestMethod()]
     public void TestHasDependeesLessThan1()
     {
@@ -330,8 +447,9 @@ public class DependencyGraphTest
 
         Assert.IsFalse(t.HasDependees("m"));
     }
-
-    //Test the HasDependents method on string that hasn't been added to DG
+    /// <summary>
+    /// Test the HasDependents method on string that hasn't been added to DG
+    /// </summary>
     [TestMethod()]
     public void TestHasDependentsNoDependeees()
     {
@@ -340,4 +458,5 @@ public class DependencyGraphTest
 
         Assert.IsFalse(t.HasDependees("z"));
     }
+
 }
