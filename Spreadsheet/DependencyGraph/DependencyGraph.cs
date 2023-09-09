@@ -65,7 +65,7 @@ public class DependencyGraph
     /// </summary>
     public int NumDependees(string s)
     {
-        if (dependees.TryGetValue(s, out HashSet<string> dependeeSet))
+        if (dependees.TryGetValue(s, out HashSet<string>? dependeeSet))
         {
             return dependeeSet.Count;
         }
@@ -79,13 +79,11 @@ public class DependencyGraph
     /// </summary>
     public bool HasDependents(string s)
     {
-        if(dependents.TryGetValue(s, out HashSet<string> dependentSet))
-        {
-            if(dependentSet.Count > 0)
+        if (dependents.TryGetValue(s, out HashSet<string>? dependentSet))
+            if (dependentSet.Count > 0)
             {
                 return true;
             }
-        }
         return false;
     }
 
@@ -95,13 +93,11 @@ public class DependencyGraph
     /// </summary>
     public bool HasDependees(string s)
     {
-        if (dependees.TryGetValue(s, out HashSet<string> dependeeSet))
-        {
+        if (dependees.TryGetValue(s, out HashSet<string>? dependeeSet))
             if (dependeeSet.Count > 0)
             {
                 return true;
             }
-        }
         return false;
     }
 

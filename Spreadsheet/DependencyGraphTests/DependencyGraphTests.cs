@@ -260,4 +260,84 @@ public class DependencyGraphTest
         }
     }
 
+    // Test the num dependees method works on a DG with valid values
+    [TestMethod()]
+    public void TestNumDependees()
+    {
+        DependencyGraph t = new DependencyGraph();
+
+        t.AddDependency("m", "n");
+        Assert.AreEqual(t.NumDependees("n"), 1);
+    }
+
+    //Tests num dependees when called on a string that is not contained in the
+    //dependee set
+    [TestMethod()]
+    public void TestNumDependeesNoDependee()
+    {
+        DependencyGraph t = new DependencyGraph();
+
+        t.AddDependency("m", "n");
+        Assert.AreEqual(t.NumDependees("m"), 0);
+    }
+
+    // Test the has dependents method if the count of dependents is greater than 0
+    [TestMethod()]
+    public void TestHasDependents()
+    {
+        DependencyGraph t = new DependencyGraph();
+        t.AddDependency("m", "n");
+
+        Assert.IsTrue(t.HasDependents("m"));
+    }
+
+    //Test the HasDependents method if the count of the dependents is zero
+    [TestMethod()]
+    public void TestHasDependentsLessThan1()
+    {
+        DependencyGraph t = new DependencyGraph();
+        t.AddDependency("m", "n");
+
+        Assert.IsFalse(t.HasDependents("n"));
+    }
+
+    //Test the HasDependents method on string that hasn't been added to DG
+    [TestMethod()]
+    public void TestHasDependentsNoDependents()
+    {
+        DependencyGraph t = new DependencyGraph();
+        t.AddDependency("m", "n");
+
+        Assert.IsFalse(t.HasDependents("z"));
+    }
+
+    // Test the has dependents method if the count of dependents is greater than 0
+    [TestMethod()]
+    public void TestHasDependeees()
+    {
+        DependencyGraph t = new DependencyGraph();
+        t.AddDependency("m", "n");
+
+        Assert.IsTrue(t.HasDependees("n"));
+    }
+
+    //Test the HasDependees method if the count of the dependents is zero
+    [TestMethod()]
+    public void TestHasDependeesLessThan1()
+    {
+        DependencyGraph t = new DependencyGraph();
+        t.AddDependency("m", "n");
+
+        Assert.IsFalse(t.HasDependees("m"));
+    }
+
+    //Test the HasDependents method on string that hasn't been added to DG
+    [TestMethod()]
+    public void TestHasDependentsNoDependeees()
+    {
+        DependencyGraph t = new DependencyGraph();
+        t.AddDependency("m", "n");
+
+        Assert.IsFalse(t.HasDependees("z"));
+    }
 }
