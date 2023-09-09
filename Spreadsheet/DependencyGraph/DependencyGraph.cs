@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
-
+// This class contains the library for the Dependency Graph Structure
+// Author: Markus Buckwalter
+// Date: September 8, 2023
 namespace SpreadsheetUtilities;
 
 /// <summary>
@@ -195,7 +197,6 @@ public class DependencyGraph
                 dependees.Remove(t);
             }
         }
-
     }
 
 
@@ -237,6 +238,5 @@ public class DependencyGraph
         {
             AddDependency(t, s);
         }
-
     }
 }
