@@ -225,19 +225,12 @@ namespace FormulaEvaluator
             char[] charArray = t.ToCharArray();
             if (charArray.Length > 0 && (char.IsLetter(charArray[0])))
             {
-                bool LettersRemain = true;
-                foreach (char c in charArray)
+                string varPattern = "^[A-Za-z]+[0-9]+$";
+                if(Regex.IsMatch(t, varPattern))
                 {
-                    if (char.IsNumber(c))
-                    {
-                        LettersRemain = false;
-                    }
-                    if ((!char.IsLetterOrDigit(c)) || (char.IsLetter(c) && LettersRemain == false))
-                    {
-                        throw new ArgumentException("Incorrect Variable Name");
-                    }
+                    return true;
                 }
-                return true;
+                throw new ArgumentException("Invalid Variable Name");
             }
             return false;
         }
