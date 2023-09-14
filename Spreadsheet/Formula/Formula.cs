@@ -28,6 +28,8 @@ namespace SpreadsheetUtilities;
 /// </summary>
 public class Formula
 {
+    private List<string> formula;
+
     /// <summary>
     /// Creates a Formula from a string that consists of an infix expression written as
     /// described in the class comment.  If the expression is syntactically invalid,
@@ -65,6 +67,68 @@ public class Formula
     /// </summary>
     public Formula(string formula, Func<string, string> normalize, Func<string, bool> isValid)
     {
+        List<string> tokens = GetTokens(formula).ToList();
+        int numTokens = tokens.Count();
+        int lpCount = 0;
+        int rpCount = 0;
+
+        // Makes sure there is at least one token
+        if (numTokens <= 0)
+            throw new FormulaFormatException("Must have at least One token in Formula");
+
+        // Checks the tokens for legality
+        if (!hasValidTokens(formula))
+        {
+            throw new FormulaFormatException("Illegal tokens contained in formula");
+        }
+        // Checks the first element in the formula
+        string token = tokens[0];
+        if (!(token != "(" || double.TryParse(token, out double result)
+            || Regex.IsMatch(token, @"^[a-zA-Z_][a-zA-Z0-9_]*$")))
+        {
+            throw new FormulaFormatException("First element in the Formula must be a valid " +
+                "variable, number, or an opening parenthesis");
+        }
+
+        // Checks the last element in the formula
+        token = tokens[numTokens - 1];
+        if (!(token != ")" || double.TryParse(token, out result)
+            || Regex.IsMatch(token, @"^[a-zA-Z_][a-zA-Z0-9_]*$")))
+        {
+            throw new FormulaFormatException("Last element in the Formula must be a valid " +
+                "variable, number, or an opening parenthesis");
+        }
+
+        for (int i = 0; i < numTokens; i++)
+        {
+            token = tokens[i];
+
+            if (token == "(")
+            {
+                lpCount++;
+            }
+            else if (token == ")")
+            {
+                rpCount++;
+                if (rpCount > lpCount)
+                {
+                    throw new FormulaFormatException("Invalid use of parenthesis in formula");
+                }
+            }
+
+            else if (Regex.IsMatch(token, @"^[a-zA-Z_][a-zA-Z0-9_]*$"))
+            {
+                tokens[i] = normalize(token);
+            }
+            else if (double.TryParse(token, out result))
+            {
+
+            }
+            //else
+            //    throw new FormulaFormatException("Illegal tokens contained in formula");
+
+        }
+        this.formula = tokens;
     }
 
     /// <summary>
@@ -204,6 +268,30 @@ public class Formula
                 yield return s;
             }
         }
+
+    }
+
+    private static bool hasValidTokens(string formula)
+    {
+        List<string> tokens = GetTokens(formula).ToList();
+        int numTokens = tokens.Count();
+
+        for (int i = 0; i < numTokens; i++)
+        {
+            string token = tokens[i];
+            if (!(token == "(" || token == ")" || token == "-" || token == "+" || token == "*"
+                    || token == "/" || Regex.IsMatch(token, @"^[a-zA-Z_][a-zA-Z0-9_]*$")
+                    || double.TryParse(token, out double result)))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static void SyntaxChecker(string formula)
+    {
+
 
     }
 }
