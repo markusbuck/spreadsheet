@@ -4,6 +4,8 @@
 // Last updated: August 2023 (small tweak to API)
 
 using System;
+using System.Collections.Generic;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace SpreadsheetUtilities;
@@ -30,6 +32,7 @@ namespace SpreadsheetUtilities;
 public class Formula
 {
     private List<string> formula;
+    private string formulaString;
 
     /// <summary>
     /// Creates a Formula from a string that consists of an infix expression written as
@@ -68,6 +71,8 @@ public class Formula
     /// </summary>
     public Formula(string formula, Func<string, string> normalize, Func<string, bool> isValid)
     {
+        StringBuilder builder = new StringBuilder();
+
         List<string> tokens = GetTokens(formula).ToList();
         int numTokens = tokens.Count();
         int lpCount = 0;
@@ -186,12 +191,15 @@ public class Formula
                 tokens[i] = result.ToString();
                 Console.WriteLine(tokens[i]);
             }
+
+            builder.Append(tokens[i]);
         }
         // Balanced Parenthesis rule
         if (lpCount != rpCount)
         {
             throw new FormulaFormatException("Invalid use of parenthesis, missing a parenthesis");
         }
+        formulaString = builder.ToString();
         this.formula = tokens;
     }
 
@@ -231,27 +239,31 @@ public class Formula
 
                     double operand2 = values.Pop();
                     string sign = operators.Pop();
-                    if(!Operate(operand1, operand2, sign, out double result))
+                    if (!Operate(operand1, operand2, sign, out double result))
                     {
                         return new FormulaError("Cannot Divide by Zero");
                     }
                     values.Push(result);
-
                 }
                 else
-
                     values.Push(operand1);
             }
             else if (Regex.IsMatch(s, @"^[a-zA-Z_][a-zA-Z0-9_]*$"))
             {
-                operand1 = lookup(s);
-
+                try
+                {
+                    operand1 = lookup(s);
+                }
+                catch (ArgumentException)
+                {
+                    return new FormulaError("Undefined Variable in Formula");
+                }
                 if (operators.Count > 0 && (operators.Peek() == "*" || operators.Peek() == "/"))
                 {
 
                     double operand2 = values.Pop();
                     string sign = operators.Pop();
-                    if(!Operate(operand1, operand2, sign, out double result))
+                    if (!Operate(operand1, operand2, sign, out double result))
                     {
                         return new FormulaError("Cannot divide by zero");
                     }
@@ -296,14 +308,13 @@ public class Formula
                     double value = values.Pop();
                     double operand = values.Pop();
                     string sign = operators.Pop();
-                    if(!Operate(operand, value, sign, out double result))
+                    if (!Operate(operand, value, sign, out double result))
                     {
                         return new FormulaError("Cannot Divide by Zero");
                     }
                     values.Push(result);
                 }
             }
-
         }
         if (operators.Count > 0)
         {
@@ -316,7 +327,6 @@ public class Formula
 
                 return Operate(addend1, addend2, sign, out double result);
             }
-
         }
         return values.Pop();
     }
@@ -334,7 +344,15 @@ public class Formula
     /// </summary>
     public IEnumerable<string> GetVariables()
     {
-        return new List<string>();
+        List<String> variables = new List<string>();
+        foreach (string token in this.formula)
+        {
+            if (Regex.IsMatch(token, @"^[a-zA-Z_][a-zA-Z0-9_]*$"))
+            {
+                variables.Add(token);
+            }
+        }
+        return variables;
     }
 
     /// <summary>
@@ -349,7 +367,7 @@ public class Formula
     /// </summary>
     public override string ToString()
     {
-        return "";
+        return formulaString;
     }
 
     /// <summary>
@@ -373,7 +391,12 @@ public class Formula
     /// </summary>
     public override bool Equals(object? obj)
     {
-        return false;
+        if((!(obj is Formula)) || obj == null)
+        {
+            return false;
+        }
+        Formula otherFormula = (Formula)obj;
+        return this.formula.ToString == otherFormula.ToString;
     }
 
     /// <summary>
@@ -382,7 +405,7 @@ public class Formula
     /// </summary>
     public static bool operator ==(Formula f1, Formula f2)
     {
-        return false;
+        return f1.ToString == f2.ToString;
     }
 
     /// <summary>
@@ -391,7 +414,7 @@ public class Formula
     /// </summary>
     public static bool operator !=(Formula f1, Formula f2)
     {
-        return false;
+        return !(f1.ToString == f2.ToString);
     }
 
     /// <summary>
@@ -401,7 +424,7 @@ public class Formula
     /// </summary>
     public override int GetHashCode()
     {
-        return 0;
+        return formulaString.GetHashCode();
     }
 
     /// <summary>
