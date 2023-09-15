@@ -3,6 +3,7 @@
 // do anything else!
 // Last updated: August 2023 (small tweak to API)
 
+using System;
 using System.Text.RegularExpressions;
 
 namespace SpreadsheetUtilities;
@@ -76,14 +77,14 @@ public class Formula
         if (numTokens <= 0)
             throw new FormulaFormatException("Must have at least One token in Formula");
 
-        // Checks the tokens for legality
+        // Checks the tokens for legality with helper method
         if (!hasValidTokens(formula))
         {
             throw new FormulaFormatException("Illegal tokens contained in formula");
         }
         // Checks the first element in the formula
         string token = tokens[0];
-        if (!(token != "(" || double.TryParse(token, out double result)
+        if (!(token == "(" || double.TryParse(token, out double result)
             || Regex.IsMatch(token, @"^[a-zA-Z_][a-zA-Z0-9_]*$")))
         {
             throw new FormulaFormatException("First element in the Formula must be a valid " +
@@ -92,21 +93,33 @@ public class Formula
 
         // Checks the last element in the formula
         token = tokens[numTokens - 1];
-        if (!(token != ")" || double.TryParse(token, out result)
+        if (!(token == ")" || double.TryParse(token, out result)
             || Regex.IsMatch(token, @"^[a-zA-Z_][a-zA-Z0-9_]*$")))
         {
             throw new FormulaFormatException("Last element in the Formula must be a valid " +
                 "variable, number, or an opening parenthesis");
         }
 
+        // Checks the Syntax rules given in assignment discription
         for (int i = 0; i < numTokens; i++)
         {
             token = tokens[i];
 
+            // Opening paren
             if (token == "(")
             {
                 lpCount++;
+
+                if (i + 1 < numTokens)
+                {
+                    if (!operatorSuccessor(i, tokens))
+                    {
+                        throw new FormulaFormatException("Opening Parenthesis must be followed by a number, " +
+                            "variable or opening parenthesis");
+                    }
+                }
             }
+            // Closing paren
             else if (token == ")")
             {
                 rpCount++;
@@ -114,19 +127,70 @@ public class Formula
                 {
                     throw new FormulaFormatException("Invalid use of parenthesis in formula");
                 }
+                if (i + 1 < numTokens)
+                {
+                    if (!valueSuccessor(i, tokens))
+                    {
+                        throw new FormulaFormatException("Closing parenthesis must be followed by an operator or closing " +
+                            "parenthesis");
+                    }
+                }
             }
 
+            // Operators
+            else if (token == "+" || token == "-" || token == "*" || token == "/")
+            {
+                if (i + 1 < numTokens)
+                {
+                    if (!operatorSuccessor(i, tokens))
+                    {
+                        throw new FormulaFormatException("Operator must be followed by a number, " +
+                            "variable or opening parenthesis");
+                    }
+                }
+            }
+            // Variables
             else if (Regex.IsMatch(token, @"^[a-zA-Z_][a-zA-Z0-9_]*$"))
             {
                 tokens[i] = normalize(token);
+
+
+                if (!isValid(tokens[i]))
+                {
+                    throw new FormulaFormatException("Invalid variable after normalization");
+                }
+
+                if (i + 1 < numTokens)
+                {
+                    if (!valueSuccessor(i, tokens))
+                    {
+                        throw new FormulaFormatException("Variable must be followed by an operator or closing " +
+                            "parenthesis");
+                    }
+                }
+
+                Console.WriteLine(tokens[i]);
+
             }
+            // number
             else if (double.TryParse(token, out result))
             {
-
+                if (i + 1 < numTokens)
+                {
+                    if (!valueSuccessor(i, tokens))
+                    {
+                        throw new FormulaFormatException("Number must be followed by an operator or closing " +
+                            "parenthesis");
+                    }
+                }
+                tokens[i] = result.ToString();
+                Console.WriteLine(tokens[i]);
             }
-            //else
-            //    throw new FormulaFormatException("Illegal tokens contained in formula");
-
+        }
+        // Balanced Parenthesis rule
+        if (lpCount != rpCount)
+        {
+            throw new FormulaFormatException("Invalid use of parenthesis, missing a parenthesis");
         }
         this.formula = tokens;
     }
@@ -154,7 +218,107 @@ public class Formula
     /// </summary>
     public object Evaluate(Func<string, double> lookup)
     {
-        return "";
+        Stack<double> values = new Stack<double>();
+        Stack<string> operators = new Stack<string>();
+
+        foreach (string s in this.formula)
+        {
+
+            if (double.TryParse(s, out double operand1))
+            {
+                if (operators.Count > 0 && (operators.Peek() == "*" || operators.Peek() == "/"))
+                {
+
+                    double operand2 = values.Pop();
+                    string sign = operators.Pop();
+                    if(!Operate(operand1, operand2, sign, out double result))
+                    {
+                        return new FormulaError("Cannot Divide by Zero");
+                    }
+                    values.Push(result);
+
+                }
+                else
+
+                    values.Push(operand1);
+            }
+            else if (Regex.IsMatch(s, @"^[a-zA-Z_][a-zA-Z0-9_]*$"))
+            {
+                operand1 = lookup(s);
+
+                if (operators.Count > 0 && (operators.Peek() == "*" || operators.Peek() == "/"))
+                {
+
+                    double operand2 = values.Pop();
+                    string sign = operators.Pop();
+                    if(!Operate(operand1, operand2, sign, out double result))
+                    {
+                        return new FormulaError("Cannot divide by zero");
+                    }
+                    values.Push(result);
+                }
+                else
+                    values.Push(operand1);
+            }
+            else if (s == "+" || s == "-")
+            {
+                if (operators.Count > 0 && (operators.Peek() == "+" || operators.Peek() == "-"))
+                {
+
+                    double addend2 = values.Pop();
+                    double addend1 = values.Pop();
+                    string sign = operators.Pop();
+                    Operate(addend1, addend2, sign, out double result);
+                    values.Push(result);
+                }
+                operators.Push(s);
+            }
+            else if (s == "*" || s == "/" || s == "(")
+            {
+                operators.Push(s);
+            }
+            else if (s == ")")
+            {
+                if (operators.Count > 0 && (operators.Peek() == "+" || operators.Peek() == "-"))
+                {
+
+                    double addend2 = values.Pop();
+                    double addend1 = values.Pop();
+                    string sign = operators.Pop();
+                    Operate(addend1, addend2, sign, out double result);
+                    values.Push(result);
+
+                }
+
+                if (operators.Count > 0 && (operators.Peek() == "*" || operators.Peek() == "/"))
+                {
+
+                    double value = values.Pop();
+                    double operand = values.Pop();
+                    string sign = operators.Pop();
+                    if(!Operate(operand, value, sign, out double result))
+                    {
+                        return new FormulaError("Cannot Divide by Zero");
+                    }
+                    values.Push(result);
+                }
+            }
+
+        }
+        if (operators.Count > 0)
+        {
+            if (operators.Peek() == "+" || operators.Peek() == "-")
+            {
+
+                double addend2 = values.Pop();
+                double addend1 = values.Pop();
+                string sign = operators.Pop();
+
+                return Operate(addend1, addend2, sign, out double result);
+            }
+
+        }
+        return values.Pop();
     }
 
     /// <summary>
@@ -289,10 +453,55 @@ public class Formula
         return true;
     }
 
-    private static void SyntaxChecker(string formula)
+    private static bool operatorSuccessor(int index, List<String> tokenList)
     {
+        string token = tokenList[index + 1];
+        if (token == "(" || double.TryParse(token, out double result)
+            || Regex.IsMatch(token, @"^[a-zA-Z_][a-zA-Z0-9_]*$"))
+        {
+            return true;
+        }
+        return false;
+    }
 
+    private static bool valueSuccessor(int index, List<String> tokenList)
+    {
+        string succeedingToken = tokenList[index + 1];
+        if (succeedingToken == ")" || succeedingToken == "-"
+            || succeedingToken == "+" || succeedingToken == "*" || succeedingToken == "/")
+        {
+            return true;
+        }
+        return false;
+    }
 
+    private static bool Operate(double num1, double num2, string sign, out double product)
+    {
+        product = 0.0;
+        if (sign == "+")
+        {
+            product = num2 + num1;
+        }
+        if (sign == "-")
+        {
+            product = num1 - num2;
+        }
+        if (sign == "*")
+        {
+            product = num2 * num1;
+        }
+        if (sign == "/")
+        {
+            if (num1 == 0)
+            {
+                return false;
+            }
+            else
+            {
+                product = num2 / num1;
+            }
+        }
+        return true;
     }
 }
 
