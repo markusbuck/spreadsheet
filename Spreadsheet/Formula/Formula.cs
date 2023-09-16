@@ -1,7 +1,6 @@
-﻿// Skeleton written by Profs Zachary, Kopta and Martin for CS 3500
-// Read the entire skeleton carefully and completely before you
-// do anything else!
-// Last updated: August 2023 (small tweak to API)
+﻿// PS3
+// Author: Markus Buckwalter
+// Date: September 15, 20223
 
 using System;
 using System.Collections.Generic;
@@ -31,8 +30,9 @@ namespace SpreadsheetUtilities;
 /// </summary>
 public class Formula
 {
-    private List<string> formula;
+    private readonly List<string> formula;
     private string formulaString;
+    private string normalizedString;
 
     /// <summary>
     /// Creates a Formula from a string that consists of an infix expression written as
@@ -72,6 +72,7 @@ public class Formula
     public Formula(string formula, Func<string, string> normalize, Func<string, bool> isValid)
     {
         StringBuilder builder = new StringBuilder();
+        StringBuilder normBuilder = new StringBuilder();
 
         List<string> tokens = GetTokens(formula).ToList();
         int numTokens = tokens.Count();
@@ -123,6 +124,7 @@ public class Formula
                             "variable or opening parenthesis");
                     }
                 }
+                normBuilder.Append(tokens[i]);
             }
             // Closing paren
             else if (token == ")")
@@ -140,6 +142,7 @@ public class Formula
                             "parenthesis");
                     }
                 }
+                normBuilder.Append(tokens[i]);
             }
 
             // Operators
@@ -153,6 +156,7 @@ public class Formula
                             "variable or opening parenthesis");
                     }
                 }
+                normBuilder.Append(tokens[i]);
             }
             // Variables
             else if (Regex.IsMatch(token, @"^[a-zA-Z_][a-zA-Z0-9_]*$"))
@@ -174,8 +178,7 @@ public class Formula
                     }
                 }
 
-                Console.WriteLine(tokens[i]);
-
+                normBuilder.Append(tokens[i]);
             }
             // number
             else if (double.TryParse(token, out result))
@@ -188,8 +191,8 @@ public class Formula
                             "parenthesis");
                     }
                 }
-                tokens[i] = result.ToString();
-                Console.WriteLine(tokens[i]);
+
+                normBuilder.Append(result.ToString());
             }
 
             builder.Append(tokens[i]);
@@ -199,6 +202,7 @@ public class Formula
         {
             throw new FormulaFormatException("Invalid use of parenthesis, missing a parenthesis");
         }
+        normalizedString = normBuilder.ToString();
         formulaString = builder.ToString();
         this.formula = tokens;
     }
@@ -231,7 +235,7 @@ public class Formula
 
         foreach (string s in this.formula)
         {
-
+            // Numbers
             if (double.TryParse(s, out double operand1))
             {
                 if (operators.Count > 0 && (operators.Peek() == "*" || operators.Peek() == "/"))
@@ -248,6 +252,7 @@ public class Formula
                 else
                     values.Push(operand1);
             }
+            // Variables
             else if (Regex.IsMatch(s, @"^[a-zA-Z_][a-zA-Z0-9_]*$"))
             {
                 try
@@ -272,6 +277,7 @@ public class Formula
                 else
                     values.Push(operand1);
             }
+            // Plus or Minus
             else if (s == "+" || s == "-")
             {
                 if (operators.Count > 0 && (operators.Peek() == "+" || operators.Peek() == "-"))
@@ -285,6 +291,7 @@ public class Formula
                 }
                 operators.Push(s);
             }
+            // Operators
             else if (s == "*" || s == "/" || s == "(")
             {
                 operators.Push(s);
@@ -324,8 +331,10 @@ public class Formula
                 double addend2 = values.Pop();
                 double addend1 = values.Pop();
                 string sign = operators.Pop();
-
-                return Operate(addend1, addend2, sign, out double result);
+                if(Operate(addend1, addend2, sign, out double result))
+                {
+                    return result;
+                }
             }
         }
         return values.Pop();
@@ -391,12 +400,12 @@ public class Formula
     /// </summary>
     public override bool Equals(object? obj)
     {
-        if((!(obj is Formula)) || obj == null)
+        if ((!(obj is Formula)) || obj == null)
         {
             return false;
         }
         Formula otherFormula = (Formula)obj;
-        return this.formula.ToString == otherFormula.ToString;
+        return this.getNormString() == otherFormula.getNormString();
     }
 
     /// <summary>
@@ -405,7 +414,7 @@ public class Formula
     /// </summary>
     public static bool operator ==(Formula f1, Formula f2)
     {
-        return f1.ToString == f2.ToString;
+        return f1.getNormString() == f2.getNormString();
     }
 
     /// <summary>
@@ -414,7 +423,7 @@ public class Formula
     /// </summary>
     public static bool operator !=(Formula f1, Formula f2)
     {
-        return !(f1.ToString == f2.ToString);
+        return !(f1.getNormString() == f2.getNormString());
     }
 
     /// <summary>
@@ -457,7 +466,11 @@ public class Formula
         }
 
     }
-
+    /// <summary>
+    /// Checks if the given Formula has all valid tokens
+    /// </summary>
+    /// <param name="formula"></param>
+    /// <returns> False if a invalid token is found, True otherwise </returns>
     private static bool hasValidTokens(string formula)
     {
         List<string> tokens = GetTokens(formula).ToList();
@@ -476,6 +489,12 @@ public class Formula
         return true;
     }
 
+    /// <summary>
+    /// Checks the succeeding element of an operator
+    /// </summary>
+    /// <param name="index"></param>
+    /// <param name="tokenList"></param>
+    /// <returns> True if the next element is a left parenthesis, number, or variable </returns>
     private static bool operatorSuccessor(int index, List<String> tokenList)
     {
         string token = tokenList[index + 1];
@@ -487,6 +506,12 @@ public class Formula
         return false;
     }
 
+    /// <summary>
+    /// Checks the succeeding element of a value or closing parenthesis
+    /// </summary>
+    /// <param name="index"></param>
+    /// <param name="tokenList"></param>
+    /// <returns> true if the next element is an operator or closing parenthesis </returns>
     private static bool valueSuccessor(int index, List<String> tokenList)
     {
         string succeedingToken = tokenList[index + 1];
@@ -498,6 +523,14 @@ public class Formula
         return false;
     }
 
+    /// <summary>
+    /// Applies the operations to given numbers from the evaluate method
+    /// </summary>
+    /// <param name="num1"></param>
+    /// <param name="num2"></param>
+    /// <param name="sign"></param>
+    /// <param name="product"></param>
+    /// <returns> true if the operation is completed </returns>
     private static bool Operate(double num1, double num2, string sign, out double product)
     {
         product = 0.0;
@@ -525,6 +558,15 @@ public class Formula
             }
         }
         return true;
+    }
+    /// <summary>
+    /// Gets the Normalized version of the string meaning the numbers have been parsed and converted to
+    /// a string 
+    /// </summary>
+    /// <returns> normalizedString </returns>
+    private string getNormString()
+    {
+        return normalizedString;
     }
 }
 
