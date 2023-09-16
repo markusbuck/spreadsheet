@@ -4,7 +4,7 @@ namespace FormulaTests;
 /// Defines the Test for the Fomula Class some test ideas derived from the ps1 tests.
 /// </summary>
 [TestClass]
-public class FormulaTests
+public class FormulaTest
 {
     // Verifies a Formula with legals and an illegal token 
     [TestMethod()]
