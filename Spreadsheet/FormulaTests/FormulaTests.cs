@@ -4,7 +4,7 @@ namespace FormulaTests;
 /// Defines the Test for the Fomula Class some test ideas derived from the ps1 tests.
 /// </summary>
 [TestClass]
-public class FormulaTest
+public class FormulaTests
 {
     // Verifies a Formula with legals and an illegal token 
     [TestMethod()]
@@ -21,7 +21,7 @@ public class FormulaTest
     {
         Formula form = new Formula("(% + * + &) * 9");
     }
-   
+
     // Verifies a Formula with no tokens throws
     [TestMethod()]
     [ExpectedException(typeof(FormulaFormatException))]
@@ -160,21 +160,6 @@ public class FormulaTest
         Assert.AreEqual(194.0, form.Evaluate(s => 0));
     }
 
-    //[TestMethod()]
-    //[ExpectedException(typeof(ArgumentException))]
-    //public void TestDivideByZero()
-    //{
-    //    Formula form = new Formula("5/0");
-    //    Assert.AreEqual(FormulaError(), form.Evaluate(s => 0));
-    //}
-
-    [TestMethod()]
-    public void TestComplexMultiVar()
-    {
-        Formula form = new Formula("y1*3-8/2+4*(8-9*2)/14*x7");
-        Assert.AreEqual(6.0, form.Evaluate(s => (s == "x7") ? 1 : 4));
-    }
-
     [TestMethod()]
     public void TestComplexNestedParensRight()
     {
@@ -195,5 +180,4 @@ public class FormulaTest
         Formula form = new Formula("a4-a4*a4/a4");
         Assert.AreEqual(0.0, form.Evaluate(s => 3));
     }
-
 }

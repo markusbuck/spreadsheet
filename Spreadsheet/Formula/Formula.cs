@@ -308,7 +308,7 @@ public class Formula
                     values.Push(result);
 
                 }
-
+                operators.Pop();
                 if (operators.Count > 0 && (operators.Peek() == "*" || operators.Peek() == "/"))
                 {
 
@@ -331,13 +331,14 @@ public class Formula
                 double addend2 = values.Pop();
                 double addend1 = values.Pop();
                 string sign = operators.Pop();
-                if(Operate(addend1, addend2, sign, out double result))
+                if (Operate(addend1, addend2, sign, out double result))
                 {
                     return result;
                 }
             }
         }
         return values.Pop();
+
     }
 
     /// <summary>
@@ -568,8 +569,42 @@ public class Formula
     {
         return normalizedString;
     }
-}
 
+    private static double MultiplyOrDivide(double num1, double num2, string sign)
+    {
+        double product = 0;
+        if (sign == "*")
+        {
+            product = num2 * num1;
+        }
+        if (sign == "/")
+        {
+            if (num1 == 0)
+            {
+                throw new ArgumentException("Cannot Divide by Zero");
+            }
+            else
+            {
+                product = num2 / num1;
+            }
+        }
+        return product;
+    }
+
+    private static double AddOrSubtract(double num1, double num2, string sign)
+    {
+        double product = 0;
+        if (sign == "+")
+        {
+            product = num2 + num1;
+        }
+        if (sign == "-")
+        {
+            product = num1 - num2;
+        }
+        return product;
+    }
+}
 /// <summary>
 /// Used to report syntactic errors in the argument to the Formula constructor.
 /// </summary>
