@@ -315,7 +315,7 @@ public class Formula
                     double value = values.Pop();
                     double operand = values.Pop();
                     string sign = operators.Pop();
-                    if (!Operate(operand, value, sign, out double result))
+                    if (!Operate(value, operand, sign, out double result))
                     {
                         return new FormulaError("Cannot Divide by Zero");
                     }
@@ -359,7 +359,10 @@ public class Formula
         {
             if (Regex.IsMatch(token, @"^[a-zA-Z_][a-zA-Z0-9_]*$"))
             {
-                variables.Add(token);
+                if (!variables.Contains(token))
+                {
+                    variables.Add(token);
+                }
             }
         }
         return variables;
@@ -434,7 +437,7 @@ public class Formula
     /// </summary>
     public override int GetHashCode()
     {
-        return formulaString.GetHashCode();
+        return normalizedString.GetHashCode();
     }
 
     /// <summary>
@@ -568,41 +571,6 @@ public class Formula
     private string getNormString()
     {
         return normalizedString;
-    }
-
-    private static double MultiplyOrDivide(double num1, double num2, string sign)
-    {
-        double product = 0;
-        if (sign == "*")
-        {
-            product = num2 * num1;
-        }
-        if (sign == "/")
-        {
-            if (num1 == 0)
-            {
-                throw new ArgumentException("Cannot Divide by Zero");
-            }
-            else
-            {
-                product = num2 / num1;
-            }
-        }
-        return product;
-    }
-
-    private static double AddOrSubtract(double num1, double num2, string sign)
-    {
-        double product = 0;
-        if (sign == "+")
-        {
-            product = num2 + num1;
-        }
-        if (sign == "-")
-        {
-            product = num1 - num2;
-        }
-        return product;
     }
 }
 /// <summary>
