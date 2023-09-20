@@ -1,12 +1,19 @@
 ﻿using System;
+using System.Net.Http;
 using SpreadsheetUtilities;
 
 namespace SS;
 
 public class Spreadsheet : AbstractSpreadsheet
 {
+
+    private DependencyGraph relationships;
+    private Dictionary<string, Cell> cells;
+
 	public Spreadsheet()
 	{
+        cells = new Dictionary<string, Cell>();
+        relationships = new DependencyGraph();
 	}
 
     public override object GetCellContents(string name)
@@ -37,6 +44,25 @@ public class Spreadsheet : AbstractSpreadsheet
     protected override IEnumerable<string> GetDirectDependents(string name)
     {
         throw new NotImplementedException();
+    }
+
+}
+
+public class Cell
+{
+    private object contents { get; set; }
+
+    public Cell(string contents)
+    {
+        this.contents = contents;
+    }
+    public Cell(double contents)
+    {
+        this.contents = contents;
+    }
+    public Cell(Formula contents)
+    {
+        this.contents = contents;
     }
 }
 
