@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using SpreadsheetUtilities;
 
 namespace SS;
@@ -18,17 +19,37 @@ public class Spreadsheet : AbstractSpreadsheet
 
     public override object GetCellContents(string name)
     {
-        throw new NotImplementedException();
+        if (Regex.IsMatch(name, @"^[a-zA-Z_][a-zA-Z0-9_]*$"))
+        {
+            throw new InvalidNameException();
+        }
+        if (cells.ContainsKey(name))
+        {
+            return cells[name].contents;
+        }
+        else
+            return "";
+       
     }
 
     public override IEnumerable<string> GetNamesOfAllNonemptyCells()
     {
-        throw new NotImplementedException();
+        return cells.Keys;
     }
 
     public override IList<string> SetCellContents(string name, double number)
     {
-        throw new NotImplementedException();
+        if (Regex.IsMatch(name, @"^[a-zA-Z_][a-zA-Z0-9_]*$"))
+        {
+            throw new InvalidNameException();
+        }
+        if (cells.ContainsKey(name))
+        {
+            cells[name].contents = number;
+        }
+        else
+            cells[name] = new Cell(number);
+        return relationships.GetDependents(name).Prepend(name).ToList();
     }
 
     public override IList<string> SetCellContents(string name, string text)
@@ -50,17 +71,9 @@ public class Spreadsheet : AbstractSpreadsheet
 
 public class Cell
 {
-    private object contents { get; set; }
+    public object contents { get; set; }
 
-    public Cell(string contents)
-    {
-        this.contents = contents;
-    }
-    public Cell(double contents)
-    {
-        this.contents = contents;
-    }
-    public Cell(Formula contents)
+    public Cell(object contents)
     {
         this.contents = contents;
     }

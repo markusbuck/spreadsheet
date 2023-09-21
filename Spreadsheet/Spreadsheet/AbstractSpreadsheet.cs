@@ -196,5 +196,4 @@ public abstract class AbstractSpreadsheet
         }
         changed.AddFirst(name);
     }
-
 }
