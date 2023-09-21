@@ -2,6 +2,7 @@
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using SpreadsheetUtilities;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SS;
 
@@ -54,7 +55,17 @@ public class Spreadsheet : AbstractSpreadsheet
 
     public override IList<string> SetCellContents(string name, string text)
     {
-        throw new NotImplementedException();
+        if (Regex.IsMatch(name, @"^[a-zA-Z_][a-zA-Z0-9_]*$"))
+        {
+            throw new InvalidNameException();
+        }
+        if (cells.ContainsKey(name))
+        {
+            cells[name].contents = text;
+        }
+        else
+            cells[name] = new Cell(text);
+        return relationships.GetDependents(name).Prepend(name).ToList();
     }
 
     public override IList<string> SetCellContents(string name, Formula formula)

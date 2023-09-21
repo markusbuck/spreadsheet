@@ -6,7 +6,7 @@ namespace SpreadsheetTests;
 public class SpreadsheetTests
 {
     [TestMethod]
-    public void TestMethod1()
+    public void TestMethod()
     {
         AbstractSpreadsheet spreadshit = new Spreadsheet();
     }
