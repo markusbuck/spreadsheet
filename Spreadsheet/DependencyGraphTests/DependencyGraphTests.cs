@@ -461,4 +461,18 @@ public class DependencyGraphTest
         Assert.IsFalse(t.HasDependees("z"));
     }
 
+    [TestMethod()]
+    public void Getdependents()
+    {
+        DependencyGraph t = new DependencyGraph();
+        t.AddDependency("m", "n");
+        t.AddDependency("m", "n");
+        t.AddDependency("m", "m");
+        t.AddDependency("m", "n");
+
+        foreach(string s in t.GetDependents("m"))
+        {
+            Console.WriteLine(s);
+        }
+    }
 }

@@ -18,5 +18,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Spreadsheet\Spreadsheet.csproj" />
+    <ProjectReference Include="..\Formula\Formula.csproj" />
   </ItemGroup>
 </Project>

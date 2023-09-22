@@ -178,7 +178,10 @@ public abstract class AbstractSpreadsheet
     /// <summary>
     /// A helper for the GetCellsToRecalculate method.
     /// 
-    ///   -- You should fully comment what is going on below --
+    /// This method recursively calls itself will iterating though the direct and indirect
+    /// dependents of a given cell. This method will throw
+    /// a circular exception in the case that a dependency graph contains a circular dependency.
+    /// The method returns a list of all the cells that depend on the cell that is being changed.
     /// </summary>
     private void Visit(string start, string name, ISet<string> visited, LinkedList<string> changed)
     {
