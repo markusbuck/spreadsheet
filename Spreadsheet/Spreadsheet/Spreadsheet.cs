@@ -1,4 +1,8 @@
-﻿using System;
+﻿// This file contains the code for the Spreadsheet API
+// Author: Markus Buckwalter
+// Date: September 22, 2023
+
+using System;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using SpreadsheetUtilities;
@@ -7,14 +11,21 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SS;
 
+/// <summary>
+/// This class contains the contents of the functionality of the spreadsheet
+/// MVC. This class implements AbstractSpreadsheet. 
+/// </summary>
 public class Spreadsheet : AbstractSpreadsheet
 {
 
     private DependencyGraph relationships;
     private Dictionary<string, Cell> cells;
 
-	public Spreadsheet()
-	{
+    /// <summary>
+    /// Default Constructor for the Spreadsheet
+    /// </summary>
+    public Spreadsheet()
+    {
         cells = new Dictionary<string, Cell>();
         relationships = new DependencyGraph();
     }
@@ -31,7 +42,7 @@ public class Spreadsheet : AbstractSpreadsheet
         }
         else
             return "";
-       
+
     }
 
     public override IEnumerable<string> GetNamesOfAllNonemptyCells()
@@ -65,7 +76,7 @@ public class Spreadsheet : AbstractSpreadsheet
         }
 
         relationships.ReplaceDependees(name, new HashSet<string>());
-        if (string.IsNullOrWhiteSpace(name))
+        if (string.IsNullOrWhiteSpace(text))
         {
             cells.Remove(name);
         }
@@ -103,6 +114,10 @@ public class Spreadsheet : AbstractSpreadsheet
 
 }
 
+/// <summary>
+/// Cell Class that is to be used in the spreedsheet. Has property to get and set
+/// the contents of the cell. 
+/// </summary>
 public class Cell
 {
     public object contents { get; set; }
