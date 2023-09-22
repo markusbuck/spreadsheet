@@ -1,4 +1,7 @@
-﻿using SS;
+﻿// This file contains the tests for the spreadsheet program
+// Author: Markus Buckwalter
+// Date: September 22, 2023
+using SS;
 using SpreadsheetUtilities;
 
 namespace SpreadsheetTests;
@@ -15,6 +18,18 @@ public class SpreadsheetTests
         AbstractSpreadsheet spreadsheet = new Spreadsheet();
         Assert.AreEqual(spreadsheet.GetCellContents("x1"), "");
     }
+
+    /// <summary>
+    ///  Tests the getCellContents method when the cell has an invalid name 
+    /// </summary>
+    [TestMethod]
+    [ExpectedException(typeof(InvalidNameException))]
+    public void testGetCellContents()
+    {
+        AbstractSpreadsheet spreadsheet = new Spreadsheet();
+        Assert.AreEqual(spreadsheet.GetCellContents("$"), "");
+    }
+
 
     /// <summary>
     /// Tests the setCellContents method when inserting text into the cell
@@ -54,6 +69,50 @@ public class SpreadsheetTests
 
         Assert.AreNotEqual(spreadsheet.GetCellContents("b1"), "");
         Assert.AreEqual(spreadsheet.GetCellContents("b1"), new Formula("5+4"));
+    }
+
+    /// <summary>
+    /// Tests the setCellContents method throws a circular dependency Exception when it is
+    /// dependent on its self.
+    /// </summary>
+    [TestMethod]
+    [ExpectedException(typeof(CircularException))]
+    public void testSetCellContentsCirularBasic()
+    {
+        AbstractSpreadsheet spreadsheet = new Spreadsheet();
+        spreadsheet.SetCellContents("b1", new Formula("5+4"));
+
+        Assert.AreNotEqual(spreadsheet.GetCellContents("b1"), "");
+        Assert.AreEqual(spreadsheet.GetCellContents("b1"), new Formula("5+4"));
+        spreadsheet.SetCellContents("b1", new Formula("b1"));
+    }
+
+    /// <summary>
+    /// Tests the setCellContents method throws a circular dependency Exception when it is
+    /// dependent on its indirect dependents.
+    /// </summary>
+    [TestMethod]
+    [ExpectedException(typeof(CircularException))]
+    public void testSetCellContentsCirularComplex()
+    {
+        AbstractSpreadsheet spreadsheet = new Spreadsheet();
+        spreadsheet.SetCellContents("b1", new Formula("a1 + 3"));
+        spreadsheet.SetCellContents("a1", new Formula("c1 * 8"));
+        IEnumerable<string> cells = spreadsheet.SetCellContents("c1", "bruh");
+
+        IEnumerable<string> returnVal = new List<string>
+        {
+            "c1",
+            "a1",
+            "b1"
+        };
+        Assert.AreEqual(cells.Count(), returnVal.Count());
+        for (int i = 0; i < cells.Count(); i++)
+        {
+            Assert.AreEqual(cells.ElementAt(i), returnVal.ElementAt(i));
+        }
+
+        spreadsheet.SetCellContents("c1", new Formula("7/b1"));
     }
 
 
