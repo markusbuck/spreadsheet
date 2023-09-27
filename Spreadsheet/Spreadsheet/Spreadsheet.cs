@@ -24,7 +24,7 @@ public class Spreadsheet : AbstractSpreadsheet
     /// <summary>
     /// Default Constructor for the Spreadsheet
     /// </summary>
-    public Spreadsheet()
+    public Spreadsheet() : base("default")
     {
         cells = new Dictionary<string, Cell>();
         relationships = new DependencyGraph();
@@ -45,13 +45,23 @@ public class Spreadsheet : AbstractSpreadsheet
 
     }
 
+    public override object GetCellValue(string name)
+    {
+        throw new NotImplementedException();
+    }
+
     public override IEnumerable<string> GetNamesOfAllNonemptyCells()
     {
 
         return cells.Keys;
     }
 
-    public override IList<string> SetCellContents(string name, double number)
+    public override void Save(string filename)
+    {
+        throw new NotImplementedException();
+    }
+
+    protected override IList<string> SetCellContents(string name, double number)
     {
         if (!Regex.IsMatch(name, @"^[a-zA-Z_][a-zA-Z0-9_]*$"))
         {
@@ -68,7 +78,7 @@ public class Spreadsheet : AbstractSpreadsheet
         return GetCellsToRecalculate(name).ToList();
     }
 
-    public override IList<string> SetCellContents(string name, string text)
+    protected override IList<string> SetCellContents(string name, string text)
     {
         if (!Regex.IsMatch(name, @"^[a-zA-Z_][a-zA-Z0-9_]*$"))
         {
@@ -89,7 +99,7 @@ public class Spreadsheet : AbstractSpreadsheet
         return GetCellsToRecalculate(name).ToList();
     }
 
-    public override IList<string> SetCellContents(string name, Formula formula)
+    protected override IList<string> SetCellContents(string name, Formula formula)
     {
         if (!Regex.IsMatch(name, @"^[a-zA-Z_][a-zA-Z0-9_]*$"))
         {
@@ -106,6 +116,10 @@ public class Spreadsheet : AbstractSpreadsheet
         return cellCollection.ToList();
     }
 
+    public override IList<string> SetContentsOfCell(string name, string content)
+    {
+        throw new NotImplementedException();
+    }
 
     protected override IEnumerable<string> GetDirectDependents(string name)
     {
