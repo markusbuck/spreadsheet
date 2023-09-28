@@ -30,6 +30,8 @@ public class Spreadsheet : AbstractSpreadsheet
         relationships = new DependencyGraph();
     }
 
+    //TODO:ADD CONSTRUCTORS
+
     public override object GetCellContents(string name)
     {
         if (!Regex.IsMatch(name, @"^[a-zA-Z_][a-zA-Z0-9_]*$"))
@@ -45,6 +47,7 @@ public class Spreadsheet : AbstractSpreadsheet
 
     }
 
+    //TODO:Implement
     public override object GetCellValue(string name)
     {
         throw new NotImplementedException();
@@ -56,6 +59,7 @@ public class Spreadsheet : AbstractSpreadsheet
         return cells.Keys;
     }
 
+    //TODO:Implement
     public override void Save(string filename)
     {
         throw new NotImplementedException();
@@ -63,11 +67,6 @@ public class Spreadsheet : AbstractSpreadsheet
 
     protected override IList<string> SetCellContents(string name, double number)
     {
-        if (!Regex.IsMatch(name, @"^[a-zA-Z_][a-zA-Z0-9_]*$"))
-        {
-            throw new InvalidNameException();
-        }
-
         relationships.ReplaceDependees(name, new HashSet<string>());
         if (cells.ContainsKey(name))
         {
@@ -80,11 +79,6 @@ public class Spreadsheet : AbstractSpreadsheet
 
     protected override IList<string> SetCellContents(string name, string text)
     {
-        if (!Regex.IsMatch(name, @"^[a-zA-Z_][a-zA-Z0-9_]*$"))
-        {
-            throw new InvalidNameException();
-        }
-
         relationships.ReplaceDependees(name, new HashSet<string>());
         if (string.IsNullOrWhiteSpace(text))
         {
@@ -101,10 +95,6 @@ public class Spreadsheet : AbstractSpreadsheet
 
     protected override IList<string> SetCellContents(string name, Formula formula)
     {
-        if (!Regex.IsMatch(name, @"^[a-zA-Z_][a-zA-Z0-9_]*$"))
-        {
-            throw new InvalidNameException();
-        }
         relationships.ReplaceDependees(name, formula.GetVariables());
         IEnumerable<string> cellCollection = GetCellsToRecalculate(name);
         if (cells.ContainsKey(name))
@@ -116,9 +106,29 @@ public class Spreadsheet : AbstractSpreadsheet
         return cellCollection.ToList();
     }
 
+    //TODO:Implement
     public override IList<string> SetContentsOfCell(string name, string content)
     {
-        throw new NotImplementedException();
+        if (!Regex.IsMatch(name, @"^[a-zA-Z_][a-zA-Z0-9_]*$"))
+        {
+            throw new InvalidNameException();
+        }
+        if (Double.TryParse(content, out double result))
+        {
+            return SetCellContents(name, result);
+        }
+
+        //HAVE need to tweak so that it validates and normalizes
+        else if (content.TrimStart().StartsWith("="))
+        {
+            string formulaString = content.TrimStart().Remove(0, 1);
+            Formula formula = new Formula(formulaString);
+            return SetCellContents(name, formula);
+        }
+        else
+        {
+            return SetCellContents(name, content);
+        }
     }
 
     protected override IEnumerable<string> GetDirectDependents(string name)
@@ -136,8 +146,11 @@ public class Cell
 {
     public object contents { get; set; }
 
+    public object value { get; set; }
+
     public Cell(object contents)
     {
         this.contents = contents;
+        this.value = contents;
     }
 }
