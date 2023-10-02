@@ -98,6 +98,7 @@ public abstract class AbstractSpreadsheet
     /// <summary>
     /// Version information
     /// </summary>
+    [JsonInclude]
     public string Version { get; }
 
     // ADDED FOR PS5

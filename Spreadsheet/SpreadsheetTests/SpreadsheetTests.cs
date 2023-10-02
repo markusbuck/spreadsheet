@@ -375,7 +375,9 @@ public class SpreadsheetTests
         }
     }
 
-
+    /// <summary>
+    /// Tests the white space doesn't effect the string from being a formula
+    /// </summary>
     [TestMethod()]
     public void TestRemovestringWhiteSpace()
     {
@@ -384,6 +386,9 @@ public class SpreadsheetTests
         Assert.AreEqual(spreadsheet.GetCellContents("a1"), new Formula("0+1"));
     }
 
+    /// <summary>
+    /// Tests the same as above and makes sure the value is correct
+    /// </summary>
     [TestMethod()]
     public void testSetCellContents()
     {
@@ -392,6 +397,9 @@ public class SpreadsheetTests
         Assert.AreEqual(spreadsheet.GetCellValue("a1"), 1.0);
     }
 
+    /// <summary>
+    /// Tests the getValue method when the value must be recalculated
+    /// </summary>
     [TestMethod()]
     public void testGetValue()
     {
@@ -399,10 +407,245 @@ public class SpreadsheetTests
         spreadsheet.SetContentsOfCell("a1", "= b1");
         spreadsheet.SetContentsOfCell("b1", "= c1");
         spreadsheet.SetContentsOfCell("c1", "4");
+        
+    }
+
+    /// <summary>
+    /// Tests the save method
+    /// </summary>
+    [TestMethod()]
+    public void testSave()
+    {
+        string sheet = "";
+        File.WriteAllText("save.txt", sheet);
+        AbstractSpreadsheet spreadsheet = new Spreadsheet();
+        spreadsheet.SetContentsOfCell("a1", "=b1");
+        spreadsheet.SetContentsOfCell("b1", "=c1");
+        spreadsheet.SetContentsOfCell("c1", "4");
+        spreadsheet.Save("save.txt");
+        Console.Write(File.ReadAllText("save.txt"));
         Assert.AreEqual(spreadsheet.GetCellValue("a1"), 4.0);
     }
 
+    /// <summary>
+    /// Tests what the save method does when the cells dictionary is empty
+    /// </summary>
+    [TestMethod()]
+    public void testSaveEmpty()
+    {
+        string sheet = "";
+        File.WriteAllText("save.txt", sheet);
+        AbstractSpreadsheet spreadsheet = new Spreadsheet();
+        spreadsheet.Save("save.txt");
+        Console.Write(File.ReadAllText("save.txt"));
+    }
 
+    /// <summary>
+    /// Makes sure an exception is thrown when the file doesn't exist
+    /// </summary>
+    [TestMethod()]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void testSaveException()
+    {
+        AbstractSpreadsheet spreadsheet = new Spreadsheet();
+        spreadsheet.Save("bruh.txt");
+    }
+
+    /// <summary>
+    /// Makes sure the method throws when name is not valid
+    /// </summary>
+    [TestMethod()]
+    [ExpectedException(typeof(InvalidNameException))]
+    public void testValueException()
+    {
+        AbstractSpreadsheet spreadsheet = new Spreadsheet("defaul", s => s, s => false);
+        spreadsheet.GetCellValue("a1");
+    }
+
+
+    /// <summary>
+    /// Makes sure the method throws when name is not valid
+    /// </summary>
+    [TestMethod()]
+    [ExpectedException(typeof(InvalidNameException))]
+    public void testContentsException()
+    {
+        AbstractSpreadsheet spreadsheet = new Spreadsheet("defaul", s => s, s => false);
+        spreadsheet.GetCellContents("a1");
+    }
+
+    /// <summary>
+    /// Makes sure the method throws when name is not valid
+    /// </summary>
+    [TestMethod()]
+    [ExpectedException(typeof(InvalidNameException))]
+    public void testSetContentsException()
+    {
+        AbstractSpreadsheet spreadsheet = new Spreadsheet("defaul", s => s, s => false);
+        spreadsheet.SetContentsOfCell("a1", "= 4 / 5");
+    }
+
+
+    /// <summary>
+    /// Makes sure the method throws when name is not valid
+    /// </summary>
+    [TestMethod()]
+    [ExpectedException(typeof(InvalidNameException))]
+    public void testInvalidNameException()
+    {
+        AbstractSpreadsheet spreadsheet = new Spreadsheet();
+        spreadsheet.GetCellValue("$");
+    }
+
+    /// <summary>
+    /// Makes sure the method throws when name is not valid
+    /// </summary>
+    [TestMethod()]
+    public void testValueEmpty()
+    {
+        AbstractSpreadsheet spreadsheet = new Spreadsheet();
+        Assert.AreEqual(spreadsheet.GetCellValue("a1"), "");
+    }
+
+    /// <summary>
+    /// Tests the constructor that opens a file
+    /// </summary>
+    [TestMethod()]
+    public void testReloadConstruct()
+    {
+        string sheet = @"
+    {
+    ""Cells"": {
+    ""A1"": {
+    ""StringForm"": ""5""
+    },
+    ""B3"": {
+    ""StringForm"": ""=A1+2""
+    }
+    },
+    ""Version"": ""default""
+    }";
+        File.WriteAllText("save.txt", sheet);
+        AbstractSpreadsheet spreadsheet = new Spreadsheet("save.txt", "default",
+            s => s, s=> true);
+        spreadsheet.Save("save.txt");
+        Assert.AreEqual(spreadsheet.GetCellContents("A1"), 5.0);
+    }
+
+    /// <summary>
+    /// Tests the constructor that opens a file
+    /// </summary>
+    [TestMethod()]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void testReloadConstructException()
+    {
+        AbstractSpreadsheet spreadsheet = new Spreadsheet();
+        spreadsheet.Save("sve.txt");
+    }
+
+    /// <summary>
+    /// Tests the reload contructor throws when it can't deserialize
+    /// </summary>
+    [TestMethod()]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void testReloadConstructExceptionInvalidSheet()
+    {
+        string sheet = @"
+    {
+    ""Cells"": {
+    ""A1"": {
+    ""StringForm"": 5
+    },
+    ""B3"": {
+    ""StringForm"": ""=A1+2""
+    }
+    }
+    },
+    ""Version"""": ""default""
+    }";
+        File.WriteAllText("save.txt", sheet);
+        AbstractSpreadsheet spreadsheet = new Spreadsheet("save.txt", "default",
+            s => s, s => true);
+    }
+
+    /// <summary>
+    /// Tests the reload contructor throws when it can't deserialize
+    /// </summary>
+    [TestMethod()]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void testReloadConstructExceptionNullSheet()
+    {
+        string sheet = @"
+    {
+    ""Cells"": {
+    ""A1"": {
+    ""StringForm"": ""5""
+    },
+    ""B3"": {
+    ""StringForm"": ""=A1+2""
+    }
+    }
+    },
+    ""Relationships"" : nothing
+    ""Version"""": ""default""
+    }";
+        File.WriteAllText("save.txt", sheet);
+        AbstractSpreadsheet spreadsheet = new Spreadsheet("save.txt", "default",
+            s => s, s => true);
+    }
+
+
+    /// <summary>
+    /// Tests the constructor that opens a file when the file doesn't exist
+    /// </summary>
+    [TestMethod()]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void testReloadConstructFileNotExist()
+    {
+        string sheet = @"
+    {
+    ""Cells"": {
+    ""A1"": {
+    ""StringForm"": ""5""
+    },
+    ""B3"": {
+    ""StringForm"": ""=A1+2""
+    }
+    },
+    ""Version"": ""default""
+    }";
+        File.WriteAllText("save.txt", sheet);
+        AbstractSpreadsheet spreadsheet = new Spreadsheet("sve.txt", "default",
+            s => s, s => true);
+        Assert.AreEqual(spreadsheet.GetCellContents("A1"), 5.0);
+    }
+
+
+    /// <summary>
+    /// Tests the constructor that opens a file with a wrong version 
+    /// </summary>
+    [TestMethod()]
+    [ExpectedException(typeof(SpreadsheetReadWriteException))]
+    public void testReloadConstructInvalidVersion()
+    {
+        string sheet = @"
+    {
+    ""Cells"": {
+    ""A1"": {
+    ""StringForm"": ""5""
+    },
+    ""B3"": {
+    ""StringForm"": ""=A1+2""
+    }
+    },
+    ""Version"": ""default""
+    }";
+        File.WriteAllText("save.txt", sheet);
+        AbstractSpreadsheet spreadsheet = new Spreadsheet("save.txt", "1.1",
+            s => s, s => true);
+        spreadsheet.Save("save.txt");
+        Assert.AreEqual(spreadsheet.GetCellContents("A1"), 5.0);
+    }
 
     // STRESS TESTS
     [TestMethod(), Timeout(2000)]

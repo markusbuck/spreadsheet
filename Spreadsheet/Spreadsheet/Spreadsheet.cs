@@ -4,11 +4,14 @@
 
 using System;
 using System.Net.Http;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using SpreadsheetUtilities;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Text.Json.Serialization;
+
 
 namespace SS;
 
@@ -18,11 +21,13 @@ namespace SS;
 /// </summary>
 public class Spreadsheet : AbstractSpreadsheet
 {
-    private Func<string, bool> validate;
-    private Func<string, string> normalizer;
+    private Func<string, bool> Validate;
+    private Func<string, string> Normalizer;
 
-    private DependencyGraph relationships;
-    private Dictionary<string, Cell> cells;
+    private DependencyGraph Relationships;
+
+    [JsonInclude]
+    public Dictionary<string, Cell> Cells;
     
 
     /// <summary>
@@ -30,35 +35,79 @@ public class Spreadsheet : AbstractSpreadsheet
     /// </summary>
     public Spreadsheet() : this("default", s => s, s => true)
     {
-        cells = new Dictionary<string, Cell>();
-        relationships = new DependencyGraph();
+        Cells = new Dictionary<string, Cell>();
+        Relationships = new DependencyGraph();
         Changed = false;
     }
 
+    /// <summary>
+    /// Constructor that takes in a version, a normalize function, and a validator
+    /// function.
+    /// </summary>
+    /// <param name="version"></param>
+    /// <param name="normalize"></param>
+    /// <param name="isValid"></param>
     public Spreadsheet(string version,
         Func<string, string> normalize, Func<string, bool> isValid) : base(version)
     {
-        cells = new Dictionary<string, Cell>();
-        relationships = new DependencyGraph();
+        Cells = new Dictionary<string, Cell>();
+        Relationships = new DependencyGraph();
 
-        validate = isValid;
-        normalizer = normalize;
+        Validate = isValid;
+        Normalizer = normalize;
 
         Changed = false;
     }
 
-    //FINISH IMPLEMENTATION
+    /// <summary>
+    /// Constructor that builds a spreadsheet when taking in a filename containing Json text.
+    /// Also takes in a version, normalizer, and validator 
+    /// </summary>
+    /// <param name="filename"></param>
+    /// <param name="version"></param>
+    /// <param name="normalize"></param>
+    /// <param name="isValid"></param>
+    /// <exception cref="SpreadsheetReadWriteException"></exception>
     public Spreadsheet(string filename, string version,
         Func<string, string> normalize, Func<string, bool> isValid) : base(version)
     {
-        cells = new Dictionary<string, Cell>();
-        relationships = new DependencyGraph();
-
-        validate = isValid;
-        normalizer = normalize;
-
+        Cells = new Dictionary<string, Cell>();
+        Relationships = new DependencyGraph();
+        Validate = isValid;
+        Normalizer = normalize;
         Changed = false;
+        if (!File.Exists(filename))
+        {
+            throw new SpreadsheetReadWriteException("File provided does not exist");
+        }
+        try
+        {
+            string jsonString = File.ReadAllText(filename);
+            Spreadsheet? sheet = JsonSerializer.Deserialize<Spreadsheet>(jsonString);
+            if (sheet != null)
+            {
+                if (sheet.Version != version)
+                {
+                    throw new SpreadsheetReadWriteException("File Version does not match" +
+                        " the provided Version");
+                }
+                sheet.Validate = isValid;
+                sheet.Normalizer = normalize;
+                foreach (string cell in sheet.Cells.Keys)
+                {
+                    SetContentsOfCell(cell, sheet.Cells[cell].StringForm);
+                }
+            }
+        }
+        catch
+        {
+            throw new SpreadsheetReadWriteException("File was not a valid spreedsheet");
+        }
+
     }
+
+    [JsonConstructor]
+    public Spreadsheet(string version) : this(version, s => s, s => true) { }
 
 
     public override object GetCellContents(string name)
@@ -67,86 +116,96 @@ public class Spreadsheet : AbstractSpreadsheet
         {
             throw new InvalidNameException();
         }
-        if (!validate(normalizer(name)))
+        if (!Validate(Normalizer(name)))
         {
             throw new InvalidNameException();
         }
-        if (cells.ContainsKey(name))
+        if (Cells.ContainsKey(name))
         {
-            return cells[name].contents;
+            return Cells[name].Contents;
         }
         else
             return "";
 
     }
 
-    //TODO:Implement
+    
     public override object GetCellValue(string name)
     {
         if (!Regex.IsMatch(name, @"^[a-zA-Z_][a-zA-Z0-9_]*$"))
         {
             throw new InvalidNameException();
         }
-        if (!validate(normalizer(name)))
+        if (!Validate(Normalizer(name)))
         {
             throw new InvalidNameException();
         }
-        return cells[name].value;
+        if (!Cells.ContainsKey(name))
+        {
+            return "";
+        }
+        else
+            return Cells[name].Value;
     }
 
     public override IEnumerable<string> GetNamesOfAllNonemptyCells()
     {
-        return cells.Keys;
+        return Cells.Keys;
     }
 
-    //TODO:Implement
     public override void Save(string filename)
     {
-        throw new NotImplementedException();
+        if (!File.Exists(filename))
+        {
+            throw new SpreadsheetReadWriteException("File does not exist");
+        }
+        var options = new JsonSerializerOptions { WriteIndented = true };
+        string jsonString = JsonSerializer.Serialize(this, options);
+        File.WriteAllText(filename, jsonString);
     }
 
     protected override IList<string> SetCellContents(string name, double number)
     {
-        relationships.ReplaceDependees(name, new HashSet<string>());
-        if (cells.ContainsKey(name))
+        Relationships.ReplaceDependees(name, new HashSet<string>());
+        if (Cells.ContainsKey(name))
         {
-            cells[name].contents = number;
-            cells[name].value = number;
+            Cells[name].Contents = number;
+            Cells[name].Value = number;
         }
         else
-            cells[name] = new Cell(number, number);
+            Cells[name] = new Cell(number, number);
         return GetCellsToRecalculate(name).ToList();
     }
 
     protected override IList<string> SetCellContents(string name, string text)
     {
-        relationships.ReplaceDependees(name, new HashSet<string>());
+        Relationships.ReplaceDependees(name, new HashSet<string>());
         if (string.IsNullOrWhiteSpace(text))
         {
-            cells.Remove(name);
+            Cells.Remove(name);
         }
-        else if (cells.ContainsKey(name))
+        else if (Cells.ContainsKey(name))
         {
-            cells[name].contents = text;
-            cells[name].contents = text;
+            Cells[name].Contents = text;
+            Cells[name].Contents = text;
         }
         else
-            cells[name] = new Cell(text, text);
+            Cells[name] = new Cell(text, text);
         return GetCellsToRecalculate(name).ToList();
     }
 
     protected override IList<string> SetCellContents(string name, Formula formula)
     {
-        relationships.ReplaceDependees(name, formula.GetVariables());
+        Relationships.ReplaceDependees(name, formula.GetVariables());
         IEnumerable<string> cellCollection = GetCellsToRecalculate(name);
-        if (cells.ContainsKey(name))
+        if (Cells.ContainsKey(name))
         {
-            cells[name].contents = formula;
-            cells[name].value = formula.Evaluate(Lookup);
+            Cells[name].Contents = formula;
+            Cells[name].Value = formula.Evaluate(Lookup);
         }
         else
         {
-            cells[name] = new Cell(formula, formula.Evaluate(Lookup));
+            Cells[name] = new Cell(formula, formula.Evaluate(Lookup));
         }
         return cellCollection.ToList();
     }
@@ -158,7 +217,7 @@ public class Spreadsheet : AbstractSpreadsheet
             throw new InvalidNameException();
         }
 
-        if (!validate(normalizer(name)))
+        if (!Validate(Normalizer(name)))
         {
             throw new InvalidNameException();
         }
@@ -173,7 +232,7 @@ public class Spreadsheet : AbstractSpreadsheet
         else if (content.TrimStart().StartsWith("="))
         {
             string formulaString = content.TrimStart().Remove(0, 1);
-            Formula formula = new Formula(formulaString, normalizer, validate);
+            Formula formula = new Formula(formulaString, Normalizer, Validate);
             cellCollection = SetCellContents(name, formula);
         }
         else
@@ -183,24 +242,28 @@ public class Spreadsheet : AbstractSpreadsheet
         for(int i = 1; i < cellCollection.Count(); i++)
         {
             string cell = cellCollection.ElementAt(i);
-            Formula form = (Formula)cells[cell].contents;
-            cells[cell].value = form.Evaluate(Lookup);
+            Formula form = (Formula)Cells[cell].Contents;
+            Cells[cell].Value = form.Evaluate(Lookup);
+        }
+        if (Cells.ContainsKey(name))
+        {
+            Cells[name].StringForm = content;
         }
         return cellCollection;
     }
 
     protected override IEnumerable<string> GetDirectDependents(string name)
     {
-        return relationships.GetDependents(name);
+        return Relationships.GetDependents(name);
     }
 
     private double Lookup(string cell)
     {
-        if (cells.ContainsKey(cell))
+        if (Cells.ContainsKey(cell))
         {
-            if (cells[cell].value is double)
+            if (Cells[cell].Value is double)
             {
-                return (double)cells[cell].value;
+                return (double)Cells[cell].Value;
             }
             else
                 throw new ArgumentException("The cells value is not a number");
@@ -216,14 +279,27 @@ public class Spreadsheet : AbstractSpreadsheet
 /// </summary>
 public class Cell
 {
-    public object contents { get; set; }
+    [JsonIgnore]
+    public object Contents { get; set; }
 
-    public object value { get; set; }
+    [JsonIgnore]
+    public object Value { get; set; }
+
+    [JsonInclude]
+    public string StringForm { get; set; }
 
     public Cell(object contents, object value)
     {
-        this.contents = contents;
-        this.value = value;
+        this.Contents = contents;
+        this.Value = value;
+        StringForm = "";
     }
 
+    [JsonConstructor]
+    public Cell(string stringForm)
+    {
+        this.StringForm = stringForm;
+        this.Contents = stringForm;
+        this.Value = stringForm;
+    }
 }
