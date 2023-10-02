@@ -458,7 +458,7 @@ public class SpreadsheetTests
     [ExpectedException(typeof(InvalidNameException))]
     public void testValueException()
     {
-        AbstractSpreadsheet spreadsheet = new Spreadsheet("defaul", s => s, s => false);
+        AbstractSpreadsheet spreadsheet = new Spreadsheet(s => false, s => s, "default");
         spreadsheet.GetCellValue("a1");
     }
 
@@ -470,7 +470,7 @@ public class SpreadsheetTests
     [ExpectedException(typeof(InvalidNameException))]
     public void testContentsException()
     {
-        AbstractSpreadsheet spreadsheet = new Spreadsheet("defaul", s => s, s => false);
+        AbstractSpreadsheet spreadsheet = new Spreadsheet(s => false, s => s, "default");
         spreadsheet.GetCellContents("a1");
     }
 
@@ -481,7 +481,7 @@ public class SpreadsheetTests
     [ExpectedException(typeof(InvalidNameException))]
     public void testSetContentsException()
     {
-        AbstractSpreadsheet spreadsheet = new Spreadsheet("defaul", s => s, s => false);
+        AbstractSpreadsheet spreadsheet = new Spreadsheet(s => false, s => s, "default");
         spreadsheet.SetContentsOfCell("a1", "= 4 / 5");
     }
 
@@ -526,8 +526,8 @@ public class SpreadsheetTests
     ""Version"": ""default""
     }";
         File.WriteAllText("save.txt", sheet);
-        AbstractSpreadsheet spreadsheet = new Spreadsheet("save.txt", "default",
-            s => s, s=> true);
+        AbstractSpreadsheet spreadsheet = new Spreadsheet("save.txt", s => true,
+            s => s, "default");
         spreadsheet.Save("save.txt");
         Assert.AreEqual(spreadsheet.GetCellContents("A1"), 5.0);
     }
@@ -564,8 +564,8 @@ public class SpreadsheetTests
     ""Version"""": ""default""
     }";
         File.WriteAllText("save.txt", sheet);
-        AbstractSpreadsheet spreadsheet = new Spreadsheet("save.txt", "default",
-            s => s, s => true);
+        AbstractSpreadsheet spreadsheet = new Spreadsheet("save.txt", s => true,
+            s => s, "default");
     }
 
     /// <summary>
@@ -590,8 +590,8 @@ public class SpreadsheetTests
     ""Version"""": ""default""
     }";
         File.WriteAllText("save.txt", sheet);
-        AbstractSpreadsheet spreadsheet = new Spreadsheet("save.txt", "default",
-            s => s, s => true);
+        AbstractSpreadsheet spreadsheet = new Spreadsheet("save.txt", s => true,
+            s => s, "default");
     }
 
 
@@ -615,8 +615,8 @@ public class SpreadsheetTests
     ""Version"": ""default""
     }";
         File.WriteAllText("save.txt", sheet);
-        AbstractSpreadsheet spreadsheet = new Spreadsheet("sve.txt", "default",
-            s => s, s => true);
+        AbstractSpreadsheet spreadsheet = new Spreadsheet("sve.txt", s => true,
+            s => s, "default");
         Assert.AreEqual(spreadsheet.GetCellContents("A1"), 5.0);
     }
 
@@ -641,8 +641,8 @@ public class SpreadsheetTests
     ""Version"": ""default""
     }";
         File.WriteAllText("save.txt", sheet);
-        AbstractSpreadsheet spreadsheet = new Spreadsheet("save.txt", "1.1",
-            s => s, s => true);
+        AbstractSpreadsheet spreadsheet = new Spreadsheet("save.txt", s => true,
+            s => s, "1.1");
         spreadsheet.Save("save.txt");
         Assert.AreEqual(spreadsheet.GetCellContents("A1"), 5.0);
     }

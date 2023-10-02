@@ -33,7 +33,7 @@ public class Spreadsheet : AbstractSpreadsheet
     /// <summary>
     /// Default Constructor for the Spreadsheet
     /// </summary>
-    public Spreadsheet() : this("default", s => s, s => true)
+    public Spreadsheet() : this(s => true, s => s, "default")
     {
         Cells = new Dictionary<string, Cell>();
         Relationships = new DependencyGraph();
@@ -47,8 +47,8 @@ public class Spreadsheet : AbstractSpreadsheet
     /// <param name="version"></param>
     /// <param name="normalize"></param>
     /// <param name="isValid"></param>
-    public Spreadsheet(string version,
-        Func<string, string> normalize, Func<string, bool> isValid) : base(version)
+    public Spreadsheet(Func<string, bool> isValid,
+        Func<string, string> normalize, string version) : base(version)
     {
         Cells = new Dictionary<string, Cell>();
         Relationships = new DependencyGraph();
@@ -68,8 +68,8 @@ public class Spreadsheet : AbstractSpreadsheet
     /// <param name="normalize"></param>
     /// <param name="isValid"></param>
     /// <exception cref="SpreadsheetReadWriteException"></exception>
-    public Spreadsheet(string filename, string version,
-        Func<string, string> normalize, Func<string, bool> isValid) : base(version)
+    public Spreadsheet(string filename, Func<string, bool> isValid,
+        Func<string, string> normalize, string version) : base(version)
     {
         Cells = new Dictionary<string, Cell>();
         Relationships = new DependencyGraph();
@@ -107,7 +107,7 @@ public class Spreadsheet : AbstractSpreadsheet
     }
 
     [JsonConstructor]
-    public Spreadsheet(string version) : this(version, s => s, s => true) { }
+    public Spreadsheet(string version) : this(s => true, s => s, version) { }
 
 
     public override object GetCellContents(string name)
