@@ -112,11 +112,12 @@ public class Spreadsheet : AbstractSpreadsheet
 
     public override object GetCellContents(string name)
     {
+        name = Normalizer(name);
         if (!Regex.IsMatch(name, @"^[a-zA-Z_][a-zA-Z0-9_]*$"))
         {
             throw new InvalidNameException();
         }
-        if (!Validate(Normalizer(name)))
+        if (!Validate(name))
         {
             throw new InvalidNameException();
         }
@@ -155,13 +156,19 @@ public class Spreadsheet : AbstractSpreadsheet
 
     public override void Save(string filename)
     {
-        if (!File.Exists(filename))
-        {
-            throw new SpreadsheetReadWriteException("File does not exist");
-        }
         var options = new JsonSerializerOptions { WriteIndented = true };
         string jsonString = JsonSerializer.Serialize(this, options);
-        File.WriteAllText(filename, jsonString);
+        try
+        {
+
+
+            File.WriteAllText(filename, jsonString);
+        }
+        catch
+        {
+            throw new SpreadsheetReadWriteException("Cannot Save to invalid path");
+        }
+        Changed = false;
     }
 
     protected override IList<string> SetCellContents(string name, double number)
@@ -187,7 +194,7 @@ public class Spreadsheet : AbstractSpreadsheet
         else if (Cells.ContainsKey(name))
         {
             Cells[name].Contents = text;
-            Cells[name].Contents = text;
+            Cells[name].Value = text;
         }
         else
             Cells[name] = new Cell(text, text);
