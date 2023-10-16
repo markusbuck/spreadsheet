@@ -9,8 +9,88 @@
             <MenuFlyoutItem Text="Open" Clicked="OpenClicked" />
         </MenuBarItem>
     </ContentPage.MenuBarItems>
-    <Grid>
-        <SS:SpreadsheetGrid x:Name="spreadsheetGrid" />
+
+
+
+    <Grid RowDefinitions="40, *">
+
+        <HorizontalStackLayout Margin="0"
+                               >
+            <Border
+                 Stroke="#C49B33"
+                 StrokeThickness="4"
+                 Grid.Row="0"
+                 Grid.Column="1"
+                
+
+               StrokeShape="Rectangle 40,0,0,40"
+               Background="White">
+
+                <Label
+
+                    x:Name="CellLocation"
+                     TextColor="Black"
+            Grid.Column="0"
+            Grid.Row="0"></Label>
+
+            </Border>
+
+            <Border
+                 Stroke="#C49B33"
+                 StrokeThickness="4"
+                 Grid.Row="0"
+                 Grid.Column="1"
+                
+
+               StrokeShape="Rectangle 40,0,0,40"
+               Background="White">
+
+                <Label
+                    Text="Cell contents"
+                    x:Name="CellContents"
+                     TextColor="Black"
+            Grid.Column="1"
+            Grid.Row="0"></Label>
+
+            </Border>
+
+
+            <Border
+               Stroke="#C49B33"
+               StrokeThickness="4"
+               Grid.Row="0"
+               Grid.Column="2"
+
+
+               StrokeShape="Rectangle 40,0,0,40"
+               Background="White"
+               Padding="16,8"
+               x:Name="inputBox"
+              
+               >
+
+                <Entry
+                x:Name="entryBoxText"
+                TextColor="Black"
+                Placeholder="Enter text"
+    
+           />
+            </Border>
+
+
+        </HorizontalStackLayout>
+
+
+        <SS:SpreadsheetGrid x:Name="spreadsheetGrid"
+                            Grid.Row="2"/>
+
+
+
+
+
     </Grid>
+
 </ContentPage>
+
+
 

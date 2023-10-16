@@ -7,7 +7,6 @@ namespace SpreadsheetGUI;
 /// </summary>
 public partial class MainPage : ContentPage
 {
-
     /// <summary>
     /// Constructor for the demo
     /// </summary>
@@ -21,19 +20,40 @@ public partial class MainPage : ContentPage
         // take a SpreadsheetGrid as its parameter and return nothing.  So we
         // register the displaySelection method below.
         spreadsheetGrid.SelectionChanged += displaySelection;
-        spreadsheetGrid.SetSelection(2, 3);
+
+        spreadsheetGrid.SetSelection(0, 0);
+        CellLocation.Text = ConvertToCellName(0, 0);
     }
 
     private void displaySelection(ISpreadsheetGrid grid)
     {
+
         spreadsheetGrid.GetSelection(out int col, out int row);
         spreadsheetGrid.GetValue(col, row, out string value);
         if (value == "")
         {
-            spreadsheetGrid.SetValue(col, row, DateTime.Now.ToLocalTime().ToString("T"));
+            
+            spreadsheetGrid.SetValue(col, row, entryBoxText.Text);
             spreadsheetGrid.GetValue(col, row, out value);
-            DisplayAlert("Selection:", "column " + col + " row " + row + " value " + value, "OK");
+            //DisplayAlert("Selection:", "column " + col + " row " + row + " value " + value, "OK");
         }
+
+        else
+        {
+            spreadsheetGrid.SetValue(col, row, entryBoxText.Text);
+            spreadsheetGrid.GetValue(col, row, out value);
+        }
+
+        CellLocation.Text = ConvertToCellName(col, row);
+    }
+
+    private string ConvertToCellName(int col, int row)
+    {
+        row++;
+        string colLetter = (char) (65+col) + "";
+        string cellName = " " + colLetter + row;
+
+        return cellName;
     }
 
     private void NewClicked(Object sender, EventArgs e)
