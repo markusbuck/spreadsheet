@@ -128,11 +128,13 @@ public partial class MainPage : ContentPage
             {
 
                 FileResult fileResult = await FilePicker.Default.PickAsync();
+                
                 if (fileResult != null)
                 {
                     string fileContents = File.ReadAllText(fileResult.FullPath);
+                    Console.WriteLine(fileContents);
 
-                    this.spreadsheetGrid.CreateNewSpreadSheetWithFilePath(fileContents);
+                    this.spreadsheetGrid.CreateNewSpreadSheetWithFilePath(fileResult.FullPath);
 
                     foreach (string cell in this.spreadsheetGrid.GetNonEmptyCells())
                     {
