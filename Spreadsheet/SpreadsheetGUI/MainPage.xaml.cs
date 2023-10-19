@@ -116,27 +116,42 @@ public partial class MainPage : ContentPage
     /// </summary>
     private async void OpenClicked(Object sender, EventArgs e)
     {
-        try
+        if (this.spreadsheetGrid.Changed)
         {
-            FileResult fileResult = await FilePicker.Default.PickAsync();
-            if (fileResult != null)
-            {
-                Console.WriteLine("Successfully chose file: " + fileResult.FileName);
-                // for windows, replace Console.WriteLine statements with:
-                //System.Diagnostics.Debug.WriteLine( ... );
-
-                string fileContents = File.ReadAllText(fileResult.FullPath);
-                Console.WriteLine("First 100 file chars:\n" + fileContents.Substring(0, 100));
-            }
-            else
-            {
-                Console.WriteLine("No file selected.");
-            }
+            await DisplayAlert("WARNING", "Must save changes before opening a new spreadsheet", "OK");
         }
-        catch (Exception ex)
+
+        else
         {
-            Console.WriteLine("Error opening file:");
-            Console.WriteLine(ex);
+
+            try
+            {
+
+                FileResult fileResult = await FilePicker.Default.PickAsync();
+                if (fileResult != null)
+                {
+                    string fileContents = File.ReadAllText(fileResult.FullPath);
+
+                    this.spreadsheetGrid.CreateNewSpreadSheetWithFilePath(fileContents);
+
+                    foreach (string cell in this.spreadsheetGrid.GetNonEmptyCells())
+                    {
+                        this.spreadsheetGrid.ConvertToCellNameToRowCol(cell, out int col, out int row);
+                        this.spreadsheetGrid.SetValue(col, row, this.spreadsheetGrid.getCellContents(cell));
+                    }
+                    
+
+                }
+                else
+                {
+                    Console.WriteLine("No file selected.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error opening file:");
+                Console.WriteLine(ex);
+            }
         }
     }
 

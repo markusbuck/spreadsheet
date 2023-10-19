@@ -67,9 +67,40 @@ public class SpreadsheetGrid : ScrollView, IDrawable, ISpreadsheetGrid
         }
     }
 
+    public string getCellContents(string name)
+    {
+        return this.spreadsheet.GetCellContents(name).ToString();
+    }
+
     public void CreateNewSpreadsheet()
     {
-        this.spreadsheet = new Spreadsheet();
+        this.spreadsheet = new Spreadsheet(x =>
+        {
+            if (Regex.IsMatch(x, @"^[A-Z][0-9]{1,2}$"))
+            {
+                return true;
+            }
+            else
+                return false;
+        }, x => x.ToUpper(), "ps6");
+    }
+
+    public void CreateNewSpreadSheetWithFilePath(string filename)
+    {
+        this.spreadsheet = new Spreadsheet(filename, x =>
+        {
+            if (Regex.IsMatch(x, @"^[A-Z][0-9]{1,2}$"))
+            {
+                return true;
+            }
+            else
+                return false;
+        }, x => x.ToUpper(), "ps6");
+    }
+
+    public IEnumerable<string>  GetNonEmptyCells()
+    {
+        return this.spreadsheet.GetNamesOfAllNonemptyCells();
     }
 
     public void Save(string filePath)
@@ -165,7 +196,7 @@ public class SpreadsheetGrid : ScrollView, IDrawable, ISpreadsheetGrid
     }
 
 
-    private void ConvertToCellNameToRowCol(string cellName, out int col, out int row)
+    public void ConvertToCellNameToRowCol(string cellName, out int col, out int row)
     {
         int colLetter = (int) cellName[0];
         col = colLetter - 65;
