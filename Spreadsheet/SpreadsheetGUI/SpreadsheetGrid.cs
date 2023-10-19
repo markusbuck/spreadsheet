@@ -108,6 +108,12 @@ public class SpreadsheetGrid : ScrollView, IDrawable, ISpreadsheetGrid
         this.spreadsheet.Save(filePath);
     }
 
+    public void ClearHighlightedCells()
+    {
+        this.highlightedCells = new HashSet<Address>();
+    }
+
+
     public SpreadsheetGrid()
     {
         BackgroundColor = Colors.LightGray;

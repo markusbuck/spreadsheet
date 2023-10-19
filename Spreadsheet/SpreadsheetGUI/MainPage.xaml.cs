@@ -106,6 +106,8 @@ public partial class MainPage : ContentPage
         {
             spreadsheetGrid.Clear();
             spreadsheetGrid.CreateNewSpreadsheet();
+            this.spreadsheetGrid.ClearHighlightedCells();
+
         }
     }
 
@@ -131,6 +133,7 @@ public partial class MainPage : ContentPage
                 
                 if (fileResult != null)
                 {
+                    this.spreadsheetGrid.ClearHighlightedCells();
                     string fileContents = File.ReadAllText(fileResult.FullPath);
                     Console.WriteLine(fileContents);
 
