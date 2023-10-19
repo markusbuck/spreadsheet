@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:SS="clr-namespace:SS"
              x:Class="SpreadsheetGUI.MainPage">
     <ContentPage.MenuBarItems>
@@ -9,6 +10,10 @@
             <MenuFlyoutItem Text="Open" Clicked="OpenClicked" />
             <MenuFlyoutItem Text="Save" Clicked="SaveClicked" />
         </MenuBarItem>
+        <MenuBarItem Text="Help">
+             <MenuFlyoutItem Text="Help" Clicked="HelpClicked" />
+        </MenuBarItem>
+
     </ContentPage.MenuBarItems>
 
 
@@ -49,9 +54,10 @@
                 <Label
                     Text="Cell contents"
                     x:Name="CellContents"
-                     TextColor="Black"
-            Grid.Column="1"
-            Grid.Row="0"></Label>
+                    TextColor="Black"
+                    Grid.Column="1"
+                    Grid.Row="0">
+                </Label>
 
             </Border>
 
@@ -76,6 +82,31 @@
                 Placeholder="Enter text"
     
            />
+            </Border>
+
+            <Border
+                   Stroke="#C49B33"
+               StrokeThickness="4"
+               Grid.Row="0"
+               Grid.Column="2"
+
+
+               StrokeShape="Rectangle 40,0,0,40"
+               Background="White"
+               Padding="16,8"
+               x:Name="highlightBox">
+
+                 <Button
+                    Text="highlight"
+                    x:Name="highlight"
+                    TextColor="Black"
+                    Grid.Column="3"
+                    Grid.Row="0"
+                     Clicked="HighlightButtonClick">
+                </Button>
+
+
+
             </Border>
 
 

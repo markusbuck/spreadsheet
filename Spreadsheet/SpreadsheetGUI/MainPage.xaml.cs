@@ -1,7 +1,8 @@
 ﻿using System.Text.RegularExpressions;
 using SS;
 using SpreadsheetUtilities;
-
+using CommunityToolkit.Maui.Storage;
+using System.Text;
 namespace SpreadsheetGUI;
 
 /// <summary>
@@ -10,18 +11,7 @@ namespace SpreadsheetGUI;
 public partial class MainPage : ContentPage
 {
     public delegate void SaveEventhHandler();
-
-
-
-    AbstractSpreadsheet spreadsheet = new Spreadsheet(x =>
-    {
-        if (Regex.IsMatch(x, @"^[A-Z][0-9]{1,2}$"))
-        {
-            return true;
-        }
-        else
-            return false;
-    }, x => x.ToUpper(), "ps6");
+    private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
     /// <summary>
     /// Constructor for the demo
@@ -49,43 +39,37 @@ public partial class MainPage : ContentPage
             spreadsheetGrid.GetSelection(out int col, out int row);
             spreadsheetGrid.GetValue(col, row, out string value);
 
-            string name = ConvertToCellName(col, row);
             if (!(entryBoxText.Text == null))
-            {
-                spreadsheet.SetContentsOfCell(name, entryBoxText.Text);
-            }
-            else
-            {
-                spreadsheet.SetContentsOfCell(name, "");
-            }
-            if (!(entryBoxText.Text == null))
-            {
-                spreadsheet.SetContentsOfCell(name, entryBoxText.Text);
-            }
-            else
-            {
-                spreadsheet.SetContentsOfCell(name, "");
-            }
-
-            if (value == "")
             {
                 spreadsheetGrid.SetValue(col, row, entryBoxText.Text);
-                spreadsheetGrid.GetValue(col, row, out value);
             }
-
             else
             {
-                spreadsheetGrid.SetValue(col, row, spreadsheet.GetCellValue(name).ToString());
-                spreadsheetGrid.GetValue(col, row, out value);
+                spreadsheetGrid.SetValue(col, row, "");
             }
+
+            //if(!(entryBoxText.Text == null))
+            //{
+            //    CellContents.Text = entryBoxText.Text;
+            //}
+
+            //else
+            //{
+            //    CellContents.Text = "Cell contents";
+
+            //}
+
             CellContents.Text = entryBoxText.Text;
+
             CellLocation.Text = ConvertToCellName(col, row);
+
         }
+
         catch (FormulaFormatException ex)
         {
             DisplayAlert("Error", ex.Message, "OK");
         }
-        catch(CircularException ex)
+        catch (CircularException ex)
         {
             DisplayAlert("Error", ex.Message, "OK");
         }
@@ -94,14 +78,6 @@ public partial class MainPage : ContentPage
 
     private string ConvertToCellName(int col, int row)
     {
-        //if(65 + col >= 65 && 65 + col <= 90 || 65 + col >= 97 && 65 + col <= 122)
-        // {
-        //     row++;
-        //     string colLetter = (char)(65 + col) + "";
-        //     string cellName = " " + colLetter + row;
-
-        //     return cellName;
-        // }
         row++;
         string colLetter = (char)(65 + col) + "";
         string cellName = "" + colLetter + row;
@@ -110,21 +86,24 @@ public partial class MainPage : ContentPage
         return cellName;
     }
 
-    private void SaveClicked(Object sender, EventArgs e)
+    private async void SaveClicked(Object sender, EventArgs e)
     {
-        spreadsheet.Save("someFileName");
+
+        using var stream = new MemoryStream(Encoding.Default.GetBytes(""));
+        var path = await FileSaver.SaveAsync("test.sprd", stream, cancellationTokenSource.Token);
+        spreadsheetGrid.Save(path.FilePath);
     }
 
     private void NewClicked(Object sender, EventArgs e)
     {
-        if (spreadsheet.Changed == true)
+        if (spreadsheetGrid.Changed)
         {
             DisplayAlert("WARNING", "Must save changes before opening a new spreadsheet", "OK");
         }
         else
         {
             spreadsheetGrid.Clear();
-            spreadsheet = new Spreadsheet();
+            spreadsheetGrid.CreateNewSpreadsheet();
         }
     }
 
@@ -159,8 +138,13 @@ public partial class MainPage : ContentPage
         }
     }
 
-    void MenuFlyoutItem_Clicked(System.Object sender, System.EventArgs e)
+    private void HelpClicked(Object sender, EventArgs e)
     {
+        DisplayAlert("Help", "Msdslkdfjskfslkjfksjdfsldfjskdjfslkjfsl", "OK");
+    }
 
+    private void HighlightButtonClick(Object sender, EventArgs e)
+    {
+        this.spreadsheetGrid.addHighlightedAddress();
     }
 }

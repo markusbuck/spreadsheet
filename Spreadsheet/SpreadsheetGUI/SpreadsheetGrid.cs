@@ -1,7 +1,10 @@
 ﻿// Written by Joe Zachary and Travis Martin for CS 3500, September 2011, 2023
+using System.Net;
+using System.Text.RegularExpressions;
+using Microsoft.Maui.Graphics;
 using Font = Microsoft.Maui.Graphics.Font;
-using SizeF = Microsoft.Maui.Graphics.SizeF;
 using PointF = Microsoft.Maui.Graphics.PointF;
+using SizeF = Microsoft.Maui.Graphics.SizeF;
 
 namespace SS;
 
@@ -45,9 +48,34 @@ public class SpreadsheetGrid : ScrollView, IDrawable, ISpreadsheetGrid
     // The strings contained by this grid
     private Dictionary<Address, String> _values = new();
 
+    private HashSet<Address> highlightedCells = new();
+
+
     // GraphicsView maintains the actual drawing of the grid and listens
     // for click events
     private GraphicsView graphicsView = new();
+
+    ///
+    private Spreadsheet spreadsheet;
+
+
+    public bool Changed
+    {
+        get
+        {
+            return spreadsheet.Changed;
+        }
+    }
+
+    public void CreateNewSpreadsheet()
+    {
+        this.spreadsheet = new Spreadsheet();
+    }
+
+    public void Save(string filePath)
+    {
+        this.spreadsheet.Save(filePath);
+    }
 
     public SpreadsheetGrid()
     {
@@ -60,11 +88,36 @@ public class SpreadsheetGrid : ScrollView, IDrawable, ISpreadsheetGrid
         this.Content = graphicsView;
         this.Scrolled += OnScrolled;
         this.Orientation = ScrollOrientation.Both;
+
+        
+        this.spreadsheet = new Spreadsheet(x =>
+        {
+            if (Regex.IsMatch(x, @"^[A-Z][0-9]{1,2}$"))
+            {
+                return true;
+            }
+            else
+                return false;
+        }, x => x.ToUpper(), "ps6");
+
+
     }
 
     public void Clear()
     {
         _values.Clear();
+
+        
+        this.spreadsheet = new Spreadsheet(x =>
+        {
+            if (Regex.IsMatch(x, @"^[A-Z][0-9]{1,2}$"))
+            {
+                return true;
+            }
+            else
+                return false;
+        }, x => x.ToUpper(), "ps6");
+
         Invalidate();
     }
 
@@ -78,13 +131,48 @@ public class SpreadsheetGrid : ScrollView, IDrawable, ISpreadsheetGrid
         if (c == "")
         {
             _values.Remove(a);
+
+            ///
+            this.spreadsheet.SetContentsOfCell(ConvertToCellNameTwo(col, row), c);
         }
         else
         {
-            _values[a] = c;
+
+            string cellName = ConvertToCellNameTwo(col, row);
+            IList<string> cellsToRecalculate =  this.spreadsheet.SetContentsOfCell(cellName, c);
+
+            foreach (string cell in cellsToRecalculate)
+            {
+                ConvertToCellNameToRowCol(cell, out int colNum, out int rowNum);
+                Address address = new Address(colNum, rowNum);
+                cellName = ConvertToCellNameTwo(colNum, rowNum);
+                _values[address] = this.spreadsheet.GetCellValue(cellName).ToString();
+            }
         }
         Invalidate();
         return true;
+    }
+
+    /// <summary
+    /// </summary>
+    /// <param name="col"></param>
+    /// <param name="row"></param>
+    /// <returns></returns>
+    private string ConvertToCellNameTwo(int col, int row)
+    {
+        row++;
+        string colLetter = (char)(65 + col) + "";
+        string cellName = "" + colLetter + row;
+
+        return cellName;
+    }
+
+
+    private void ConvertToCellNameToRowCol(string cellName, out int col, out int row)
+    {
+        int colLetter = (int) cellName[0];
+        col = colLetter - 65;
+        row  = int.Parse(cellName.Substring(1)) - 1;
     }
 
     public bool GetValue(int col, int row, out string c)
@@ -96,8 +184,9 @@ public class SpreadsheetGrid : ScrollView, IDrawable, ISpreadsheetGrid
         }
         if (!_values.TryGetValue(new Address(col, row), out c))
         {
-            c = "";
+            c = (string)this.spreadsheet.GetCellContents(ConvertToCellNameTwo(col, row).ToString());
         }
+
         return true;
     }
 
@@ -260,6 +349,21 @@ public class SpreadsheetGrid : ScrollView, IDrawable, ISpreadsheetGrid
                               DATA_ROW_HEIGHT - 2);
         }
 
+        /// zzzzz
+        ///
+        foreach (Address cellName in this.highlightedCells)
+        {
+            int col = cellName.Col - _firstColumn;
+            int row = cellName.Row - _firstRow;
+
+            canvas.FillColor = Colors.Yellow;
+            canvas.FillRectangle(
+                    LABEL_COL_WIDTH + col * DATA_COL_WIDTH + 1,
+                                  LABEL_ROW_HEIGHT + row * DATA_ROW_HEIGHT + 1,
+                                  DATA_COL_WIDTH - 2,
+                                  DATA_ROW_HEIGHT - 2);
+        }
+
         // Draw the text
         foreach (KeyValuePair<Address, String> address in _values)
         {
@@ -276,6 +380,10 @@ public class SpreadsheetGrid : ScrollView, IDrawable, ISpreadsheetGrid
                     size.Width, size.Height, HorizontalAlignment.Left, VerticalAlignment.Center);
             }
         }
+
+       
+
+
         canvas.RestoreState();
     }
 
@@ -314,5 +422,11 @@ public class SpreadsheetGrid : ScrollView, IDrawable, ISpreadsheetGrid
             LABEL_ROW_HEIGHT + y * DATA_ROW_HEIGHT + (DATA_ROW_HEIGHT - size.Height) / 2,
             size.Width, size.Height,
               HorizontalAlignment.Right, VerticalAlignment.Center);
+    }
+
+    public void addHighlightedAddress()
+    {
+        this.highlightedCells.Add(new Address(_selectedCol, _selectedRow));
+        Invalidate();
     }
 }
