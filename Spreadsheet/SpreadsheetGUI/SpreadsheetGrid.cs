@@ -123,6 +123,9 @@ public class SpreadsheetGrid : ScrollView, IDrawable, ISpreadsheetGrid
 
     public bool SetValue(int col, int row, string c)
     {
+        IList<string> cellsToRecalculate = this.spreadsheet.SetContentsOfCell(ConvertToCellNameTwo(col, row), c);
+        
+
         if (InvalidAddress(col, row))
         {
             return false;
@@ -131,24 +134,18 @@ public class SpreadsheetGrid : ScrollView, IDrawable, ISpreadsheetGrid
         if (c == "")
         {
             _values.Remove(a);
-
-            ///
-            this.spreadsheet.SetContentsOfCell(ConvertToCellNameTwo(col, row), c);
         }
-        else
+
+        string cellName = ConvertToCellNameTwo(col, row);
+
+        foreach (string cell in cellsToRecalculate)
         {
-
-            string cellName = ConvertToCellNameTwo(col, row);
-            IList<string> cellsToRecalculate =  this.spreadsheet.SetContentsOfCell(cellName, c);
-
-            foreach (string cell in cellsToRecalculate)
-            {
-                ConvertToCellNameToRowCol(cell, out int colNum, out int rowNum);
-                Address address = new Address(colNum, rowNum);
-                cellName = ConvertToCellNameTwo(colNum, rowNum);
-                _values[address] = this.spreadsheet.GetCellValue(cellName).ToString();
-            }
+            ConvertToCellNameToRowCol(cell, out int colNum, out int rowNum);
+            Address address = new Address(colNum, rowNum);
+            cellName = ConvertToCellNameTwo(colNum, rowNum);
+            _values[address] = this.spreadsheet.GetCellValue(cellName).ToString();
         }
+
         Invalidate();
         return true;
     }

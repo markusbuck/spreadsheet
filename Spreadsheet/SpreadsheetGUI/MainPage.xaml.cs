@@ -48,18 +48,20 @@ public partial class MainPage : ContentPage
                 spreadsheetGrid.SetValue(col, row, "");
             }
 
-            //if(!(entryBoxText.Text == null))
-            //{
-            //    CellContents.Text = entryBoxText.Text;
-            //}
+            if (entryBoxText.Text == null)
+            {
+                CellContents.Text = "Cell contents";
+            }
 
-            //else
-            //{
-            //    CellContents.Text = "Cell contents";
+            else if (entryBoxText.Text == "")
+            {
+                CellContents.Text = "Cell contents";
+            }
 
-            //}
-
-            CellContents.Text = entryBoxText.Text;
+            else
+            {
+                CellContents.Text = entryBoxText.Text;
+            }
 
             CellLocation.Text = ConvertToCellName(col, row);
 
