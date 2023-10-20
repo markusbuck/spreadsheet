@@ -80,6 +80,7 @@
                 x:Name="entryBoxText"
                 TextColor="Black"
                 Placeholder="Enter text"
+                Completed="OnEntryCompleted"
     
            />
             </Border>

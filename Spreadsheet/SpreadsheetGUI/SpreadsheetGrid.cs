@@ -55,59 +55,6 @@ public class SpreadsheetGrid : ScrollView, IDrawable, ISpreadsheetGrid
     // for click events
     private GraphicsView graphicsView = new();
 
-    ///
-    private Spreadsheet spreadsheet;
-
-
-    public bool Changed
-    {
-        get
-        {
-            return spreadsheet.Changed;
-        }
-    }
-
-    public string getCellContents(string name)
-    {
-        return this.spreadsheet.GetCellContents(name).ToString();
-    }
-
-    public void CreateNewSpreadsheet()
-    {
-        this.spreadsheet = new Spreadsheet(x =>
-        {
-            if (Regex.IsMatch(x, @"^[A-Z][0-9]{1,2}$"))
-            {
-                return true;
-            }
-            else
-                return false;
-        }, x => x.ToUpper(), "ps6");
-    }
-
-    public void CreateNewSpreadSheetWithFilePath(string filename)
-    {
-        this.spreadsheet = new Spreadsheet(filename, x =>
-        {
-            if (Regex.IsMatch(x, @"^[A-Z][0-9]{1,2}$"))
-            {
-                return true;
-            }
-            else
-                return false;
-        }, x => x.ToUpper(), "ps6");
-    }
-
-    public IEnumerable<string>  GetNonEmptyCells()
-    {
-        return this.spreadsheet.GetNamesOfAllNonemptyCells();
-    }
-
-    public void Save(string filePath)
-    {
-        this.spreadsheet.Save(filePath);
-    }
-
     public void ClearHighlightedCells()
     {
         this.highlightedCells = new HashSet<Address>();
@@ -125,44 +72,17 @@ public class SpreadsheetGrid : ScrollView, IDrawable, ISpreadsheetGrid
         this.Content = graphicsView;
         this.Scrolled += OnScrolled;
         this.Orientation = ScrollOrientation.Both;
-
-        
-        this.spreadsheet = new Spreadsheet(x =>
-        {
-            if (Regex.IsMatch(x, @"^[A-Z][0-9]{1,2}$"))
-            {
-                return true;
-            }
-            else
-                return false;
-        }, x => x.ToUpper(), "ps6");
-
-
     }
 
     public void Clear()
     {
         _values.Clear();
 
-        
-        this.spreadsheet = new Spreadsheet(x =>
-        {
-            if (Regex.IsMatch(x, @"^[A-Z][0-9]{1,2}$"))
-            {
-                return true;
-            }
-            else
-                return false;
-        }, x => x.ToUpper(), "ps6");
-
         Invalidate();
     }
 
     public bool SetValue(int col, int row, string c)
-    {
-        IList<string> cellsToRecalculate = this.spreadsheet.SetContentsOfCell(ConvertToCellNameTwo(col, row), c);
-        
-
+    {        
         if (InvalidAddress(col, row))
         {
             return false;
@@ -173,40 +93,13 @@ public class SpreadsheetGrid : ScrollView, IDrawable, ISpreadsheetGrid
             _values.Remove(a);
         }
 
-        string cellName = ConvertToCellNameTwo(col, row);
-
-        foreach (string cell in cellsToRecalculate)
+        else
         {
-            ConvertToCellNameToRowCol(cell, out int colNum, out int rowNum);
-            Address address = new Address(colNum, rowNum);
-            cellName = ConvertToCellNameTwo(colNum, rowNum);
-            _values[address] = this.spreadsheet.GetCellValue(cellName).ToString();
+            _values[a] = c;
         }
 
         Invalidate();
         return true;
-    }
-
-    /// <summary
-    /// </summary>
-    /// <param name="col"></param>
-    /// <param name="row"></param>
-    /// <returns></returns>
-    private string ConvertToCellNameTwo(int col, int row)
-    {
-        row++;
-        string colLetter = (char)(65 + col) + "";
-        string cellName = "" + colLetter + row;
-
-        return cellName;
-    }
-
-
-    public void ConvertToCellNameToRowCol(string cellName, out int col, out int row)
-    {
-        int colLetter = (int) cellName[0];
-        col = colLetter - 65;
-        row  = int.Parse(cellName.Substring(1)) - 1;
     }
 
     public bool GetValue(int col, int row, out string c)
@@ -218,9 +111,11 @@ public class SpreadsheetGrid : ScrollView, IDrawable, ISpreadsheetGrid
         }
         if (!_values.TryGetValue(new Address(col, row), out c))
         {
-            c = (string)this.spreadsheet.GetCellContents(ConvertToCellNameTwo(col, row).ToString());
+             c = "";
         }
 
+        //string cellContents = c;
+        //c = cellContents;
         return true;
     }
 
@@ -383,8 +278,7 @@ public class SpreadsheetGrid : ScrollView, IDrawable, ISpreadsheetGrid
                               DATA_ROW_HEIGHT - 2);
         }
 
-        /// zzzzz
-        ///
+        /// Change the cell box to a yellow color
         foreach (Address cellName in this.highlightedCells)
         {
             int col = cellName.Col - _firstColumn;

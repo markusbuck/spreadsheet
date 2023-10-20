@@ -3,6 +3,8 @@ using SS;
 using SpreadsheetUtilities;
 using CommunityToolkit.Maui.Storage;
 using System.Text;
+using Microsoft.Maui.Storage;
+
 namespace SpreadsheetGUI;
 
 /// <summary>
@@ -12,6 +14,7 @@ public partial class MainPage : ContentPage
 {
     public delegate void SaveEventhHandler();
     private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+    public Spreadsheet spreadsheet;
 
     /// <summary>
     /// Constructor for the demo
@@ -26,7 +29,18 @@ public partial class MainPage : ContentPage
         // take a SpreadsheetGrid as its parameter and return nothing.  So we
         // register the displaySelection method below.
         spreadsheetGrid.SelectionChanged += displaySelection;
-        
+
+        spreadsheet = new Spreadsheet(x =>
+        {
+            if (Regex.IsMatch(x, @"^[A-Z][0-9]{1,2}$"))
+            {
+                return true;
+            }
+            else
+                return false;
+        }, x => x.ToUpper(), "ps6");
+
+
         spreadsheetGrid.SetSelection(0, 0);
         CellLocation.Text = ConvertToCellName(0, 0);
     }
@@ -34,48 +48,19 @@ public partial class MainPage : ContentPage
 
     private void displaySelection(ISpreadsheetGrid grid)
     {
-        try
+        spreadsheetGrid.GetSelection(out int col, out int row);
+        string cellName = this.ConvertToCellName(col, row);
+
+        if (this.spreadsheet.GetCellContents(cellName).ToString() != "")
         {
-            spreadsheetGrid.GetSelection(out int col, out int row);
-            spreadsheetGrid.GetValue(col, row, out string value);
-
-            if (!(entryBoxText.Text == null))
-            {
-                spreadsheetGrid.SetValue(col, row, entryBoxText.Text);
-            }
-            else
-            {
-                spreadsheetGrid.SetValue(col, row, "");
-            }
-
-            if (entryBoxText.Text == null)
-            {
-                CellContents.Text = "Cell contents";
-            }
-
-            else if (entryBoxText.Text == "")
-            {
-                CellContents.Text = "Cell contents";
-            }
-
-            else
-            {
-                CellContents.Text = entryBoxText.Text;
-            }
-
-            CellLocation.Text = ConvertToCellName(col, row);
-
+            CellContents.Text = this.spreadsheet.GetCellContents(cellName).ToString();
         }
 
-        catch (FormulaFormatException ex)
+        else 
         {
-            DisplayAlert("Error", ex.Message, "OK");
-        }
-        catch (CircularException ex)
-        {
-            DisplayAlert("Error", ex.Message, "OK");
-        }
+            CellContents.Text = "Cell Contents";
 
+        }
     }
 
     private string ConvertToCellName(int col, int row)
@@ -93,19 +78,28 @@ public partial class MainPage : ContentPage
 
         using var stream = new MemoryStream(Encoding.Default.GetBytes(""));
         var path = await FileSaver.SaveAsync("test.sprd", stream, cancellationTokenSource.Token);
-        spreadsheetGrid.Save(path.FilePath);
+        this.spreadsheet.Save(path.FilePath);
     }
 
     private void NewClicked(Object sender, EventArgs e)
     {
-        if (spreadsheetGrid.Changed)
+        if (this.spreadsheet.Changed)
         {
             DisplayAlert("WARNING", "Must save changes before opening a new spreadsheet", "OK");
         }
         else
         {
             spreadsheetGrid.Clear();
-            spreadsheetGrid.CreateNewSpreadsheet();
+            this.spreadsheet = new Spreadsheet(x =>
+            {
+                if (Regex.IsMatch(x, @"^[A-Z][0-9]{1,2}$"))
+                {
+                    return true;
+                }
+                else
+                    return false;
+            }, x => x.ToUpper(), "ps6");
+
             this.spreadsheetGrid.ClearHighlightedCells();
 
         }
@@ -118,7 +112,7 @@ public partial class MainPage : ContentPage
     /// </summary>
     private async void OpenClicked(Object sender, EventArgs e)
     {
-        if (this.spreadsheetGrid.Changed)
+        if (this.spreadsheet.Changed)
         {
             await DisplayAlert("WARNING", "Must save changes before opening a new spreadsheet", "OK");
         }
@@ -137,12 +131,23 @@ public partial class MainPage : ContentPage
                     string fileContents = File.ReadAllText(fileResult.FullPath);
                     Console.WriteLine(fileContents);
 
-                    this.spreadsheetGrid.CreateNewSpreadSheetWithFilePath(fileResult.FullPath);
-
-                    foreach (string cell in this.spreadsheetGrid.GetNonEmptyCells())
+                    this.spreadsheet =  new Spreadsheet(fileResult.FullPath, x =>
                     {
-                        this.spreadsheetGrid.ConvertToCellNameToRowCol(cell, out int col, out int row);
-                        this.spreadsheetGrid.SetValue(col, row, this.spreadsheetGrid.getCellContents(cell));
+                        if (Regex.IsMatch(x, @"^[A-Z][0-9]{1,2}$"))
+                        {
+                            return true;
+                        }
+                        else
+                            return false;
+                    }, x => x.ToUpper(), "ps6");
+
+
+                    foreach (string cell in this.spreadsheet.GetNamesOfAllNonemptyCells())
+                    {
+
+                        string cellContents = this.spreadsheet.GetCellContents(cell).ToString();
+                        this.ConvertToCellNameToRowCol(cell, out int col, out int row);
+                        this.spreadsheetGrid.SetValue(col, row, cellContents);
                     }
                     
 
@@ -160,6 +165,13 @@ public partial class MainPage : ContentPage
         }
     }
 
+    public void ConvertToCellNameToRowCol(string cellName, out int col, out int row)
+    {
+        int colLetter = (int)cellName[0];
+        col = colLetter - 65;
+        row = int.Parse(cellName.Substring(1)) - 1;
+    }
+
     private void HelpClicked(Object sender, EventArgs e)
     {
         DisplayAlert("Help", "Msdslkdfjskfslkjfksjdfsldfjskdjfslkjfsl", "OK");
@@ -168,5 +180,63 @@ public partial class MainPage : ContentPage
     private void HighlightButtonClick(Object sender, EventArgs e)
     {
         this.spreadsheetGrid.addHighlightedAddress();
+    }
+
+    private void OnEntryCompleted(object sender, EventArgs e)
+    {
+        try
+        {
+            spreadsheetGrid.GetSelection(out int col, out int row);
+            spreadsheetGrid.GetValue(col, row, out string value);
+
+            IList<string> cellsToRecalculate;
+
+
+            if (!(entryBoxText.Text == null))
+            {
+                spreadsheetGrid.SetValue(col, row, entryBoxText.Text);
+                cellsToRecalculate = this.spreadsheet.SetContentsOfCell(ConvertToCellName(col, row), entryBoxText.Text);
+            }
+            else
+            {
+                spreadsheetGrid.SetValue(col, row, "");
+                cellsToRecalculate = this.spreadsheet.SetContentsOfCell(ConvertToCellName(col, row), "");
+
+            }
+
+            if (entryBoxText.Text == null)
+            {
+                CellContents.Text = "Cell contents";
+            }
+
+            else if (entryBoxText.Text == "")
+            {
+                CellContents.Text = "Cell contents";
+            }
+
+            else
+            {
+                CellContents.Text = entryBoxText.Text;
+            }
+
+            foreach (string cell in cellsToRecalculate)
+            {
+                ConvertToCellNameToRowCol(cell, out int colNum, out int rowNum);
+                this.spreadsheetGrid.SetValue(colNum, rowNum, this.spreadsheet.GetCellValue(cell).ToString());
+            }
+
+            CellLocation.Text = ConvertToCellName(col, row);
+            entryBoxText.Text = null;
+
+        }
+
+        catch (FormulaFormatException ex)
+        {
+            DisplayAlert("Error", ex.Message, "OK");
+        }
+        catch (CircularException ex)
+        {
+            DisplayAlert("Error", ex.Message, "OK");
+        }
     }
 }
