@@ -87,7 +87,7 @@
            />
             </Border>
 
-            <!--Box for the yellow highlight-->
+            <!--Button for the yellow highlight-->
             <Border
                    Stroke="#C49B33"
                StrokeThickness="4"
@@ -98,21 +98,63 @@
                StrokeShape="Rectangle 40,0,0,40"
                Background="White"
                Padding="16,8"
-               x:Name="highlightBox">
+               x:Name="yellowHighlightBox">
 
                  <Button
-                    Text="highlight"
-                    x:Name="highlight"
+                    Text="Yellow Highlight"
+                    x:Name="yellowHighlight"
                     TextColor="Black"
                     Grid.Column="3"
                     Grid.Row="0"
-                     Clicked="HighlightButtonClick">
+                     Clicked="YellowHighlightButtonClick">
                 </Button>
-
-
-
             </Border>
 
+              <!--Button for the red highlight-->
+            <Border
+                   Stroke="#C49B33"
+               StrokeThickness="4"
+               Grid.Row="0"
+               Grid.Column="2"
+
+
+               StrokeShape="Rectangle 40,0,0,40"
+               Background="White"
+               Padding="16,8"
+               x:Name="redHighlightBox">
+
+                 <Button
+                    Text="Red Highlight"
+                    x:Name="redHighlight"
+                    TextColor="Black"
+                    Grid.Column="3"
+                    Grid.Row="0"
+                     Clicked="RedHighlightButtonClick">
+                </Button>
+            </Border>
+
+                 <!--Button for the blue highlight-->
+            <Border
+                   Stroke="#C49B33"
+               StrokeThickness="4"
+               Grid.Row="0"
+               Grid.Column="2"
+
+
+               StrokeShape="Rectangle 40,0,0,40"
+               Background="White"
+               Padding="16,8"
+               x:Name="blueHighlightBox">
+
+                 <Button
+                    Text="Blue Highlight"
+                    x:Name="blueHighlight"
+                    TextColor="Black"
+                    Grid.Column="3"
+                    Grid.Row="0"
+                     Clicked="BlueHighlightButtonClick">
+                </Button>
+            </Border>
 
         </HorizontalStackLayout>
 

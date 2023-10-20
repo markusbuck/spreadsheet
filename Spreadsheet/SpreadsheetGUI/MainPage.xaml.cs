@@ -177,9 +177,19 @@ public partial class MainPage : ContentPage
         DisplayAlert("Help", "Msdslkdfjskfslkjfksjdfsldfjskdjfslkjfsl", "OK");
     }
 
-    private void HighlightButtonClick(Object sender, EventArgs e)
+    private void YellowHighlightButtonClick(Object sender, EventArgs e)
     {
-        this.spreadsheetGrid.addHighlightedAddress();
+        this.spreadsheetGrid.addHighlightedAddress("#FDFD96");
+    }
+
+    private void RedHighlightButtonClick(Object sender, EventArgs e)
+    {
+        this.spreadsheetGrid.addHighlightedAddress("#FAA0A0");
+    }
+
+    private void BlueHighlightButtonClick(Object sender, EventArgs e)
+    {
+        this.spreadsheetGrid.addHighlightedAddress("#AEC6CF");
     }
 
     private void OnEntryCompleted(object sender, EventArgs e)

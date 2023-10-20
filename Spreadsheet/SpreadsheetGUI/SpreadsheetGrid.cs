@@ -48,7 +48,7 @@ public class SpreadsheetGrid : ScrollView, IDrawable, ISpreadsheetGrid
     // The strings contained by this grid
     private Dictionary<Address, String> _values = new();
 
-    private HashSet<Address> highlightedCells = new();
+    private Dictionary<Address, String> highlightedCells = new();
 
 
     // GraphicsView maintains the actual drawing of the grid and listens
@@ -57,7 +57,7 @@ public class SpreadsheetGrid : ScrollView, IDrawable, ISpreadsheetGrid
 
     public void ClearHighlightedCells()
     {
-        this.highlightedCells = new HashSet<Address>();
+        this.highlightedCells = new Dictionary<Address, String>();
     }
 
 
@@ -279,12 +279,13 @@ public class SpreadsheetGrid : ScrollView, IDrawable, ISpreadsheetGrid
         }
 
         /// Change the cell box to a yellow color
-        foreach (Address cellName in this.highlightedCells)
+        foreach (KeyValuePair<Address, String> cellName in this.highlightedCells)
         {
-            int col = cellName.Col - _firstColumn;
-            int row = cellName.Row - _firstRow;
 
-            canvas.FillColor = Colors.Yellow;
+            int col = cellName.Key.Col - _firstColumn;
+            int row = cellName.Key.Row - _firstRow;
+
+            canvas.FillColor = Color.FromArgb(cellName.Value);
             canvas.FillRectangle(
                     LABEL_COL_WIDTH + col * DATA_COL_WIDTH + 1,
                                   LABEL_ROW_HEIGHT + row * DATA_ROW_HEIGHT + 1,
@@ -352,9 +353,9 @@ public class SpreadsheetGrid : ScrollView, IDrawable, ISpreadsheetGrid
               HorizontalAlignment.Right, VerticalAlignment.Center);
     }
 
-    public void addHighlightedAddress()
+    public void addHighlightedAddress(string color)
     {
-        this.highlightedCells.Add(new Address(_selectedCol, _selectedRow));
+        this.highlightedCells.Add(new Address(_selectedCol, _selectedRow), color);
         Invalidate();
     }
 }
