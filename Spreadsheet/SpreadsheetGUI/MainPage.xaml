@@ -22,6 +22,7 @@
 
         <HorizontalStackLayout Margin="0"
                                >
+            <!--Box for the name of the cell-->
             <Border
                  Stroke="#C49B33"
                  StrokeThickness="4"
@@ -41,6 +42,7 @@
 
             </Border>
 
+            <!--Box for the contents of the cell-->
             <Border
                  Stroke="#C49B33"
                  StrokeThickness="4"
@@ -61,7 +63,7 @@
 
             </Border>
 
-
+            <!--Entry box-->
             <Border
                Stroke="#C49B33"
                StrokeThickness="4"
@@ -85,6 +87,7 @@
            />
             </Border>
 
+            <!--Box for the yellow highlight-->
             <Border
                    Stroke="#C49B33"
                StrokeThickness="4"
