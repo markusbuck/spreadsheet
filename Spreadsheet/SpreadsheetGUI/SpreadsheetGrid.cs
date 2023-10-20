@@ -355,7 +355,8 @@ public class SpreadsheetGrid : ScrollView, IDrawable, ISpreadsheetGrid
 
     public void addHighlightedAddress(string color)
     {
-        this.highlightedCells.Add(new Address(_selectedCol, _selectedRow), color);
+        this.highlightedCells[new Address(_selectedCol, _selectedRow)] = color;
+        //this.highlightedCells.Add(new Address(_selectedCol, _selectedRow), color);
         Invalidate();
     }
 }
