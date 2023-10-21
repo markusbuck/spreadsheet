@@ -63,11 +63,11 @@ public class SpreadsheetGrid : ScrollView, IDrawable, ISpreadsheetGrid
 
     public SpreadsheetGrid()
     {
-        BackgroundColor = Colors.LightGray;
+        BackgroundColor = Colors.RoyalBlue;
         graphicsView.Drawable = this;
         graphicsView.HeightRequest = LABEL_ROW_HEIGHT + (ROW_COUNT + 1) * DATA_ROW_HEIGHT;
         graphicsView.WidthRequest = LABEL_COL_WIDTH + (COL_COUNT + 1) * DATA_COL_WIDTH;
-        graphicsView.BackgroundColor = Colors.LightGrey;
+        graphicsView.BackgroundColor = Colors.RoyalBlue;
         graphicsView.EndInteraction += OnEndInteraction;
         this.Content = graphicsView;
         this.Scrolled += OnScrolled;
@@ -113,9 +113,6 @@ public class SpreadsheetGrid : ScrollView, IDrawable, ISpreadsheetGrid
         {
              c = "";
         }
-
-        //string cellContents = c;
-        //c = cellContents;
         return true;
     }
 
@@ -278,7 +275,7 @@ public class SpreadsheetGrid : ScrollView, IDrawable, ISpreadsheetGrid
                               DATA_ROW_HEIGHT - 2);
         }
 
-        /// Change the cell box to a yellow color
+        // Change the cell box to a yellow color
         foreach (KeyValuePair<Address, String> cellName in this.highlightedCells)
         {
 
@@ -301,6 +298,7 @@ public class SpreadsheetGrid : ScrollView, IDrawable, ISpreadsheetGrid
             int row = address.Key.Row - _firstRow;
             SizeF size = canvas.GetStringSize(text, Font.Default, FONT_SIZE + FONT_SIZE * 1.75f);
             canvas.Font = Font.Default;
+            canvas.FontColor = Colors.Black;
             if (col >= 0 && row >= 0)
             {
                 canvas.DrawString(text,
@@ -309,10 +307,6 @@ public class SpreadsheetGrid : ScrollView, IDrawable, ISpreadsheetGrid
                     size.Width, size.Height, HorizontalAlignment.Left, VerticalAlignment.Center);
             }
         }
-
-       
-
-
         canvas.RestoreState();
     }
 
@@ -327,6 +321,7 @@ public class SpreadsheetGrid : ScrollView, IDrawable, ISpreadsheetGrid
         String label = ((char)('A' + x + _firstColumn)).ToString();
         SizeF size = canvas.GetStringSize(label, f, FONT_SIZE + FONT_SIZE * 1.75f);
         canvas.Font = f;
+        canvas.FontColor = Colors.White;
         canvas.FontSize = FONT_SIZE;
         canvas.DrawString(label,
               LABEL_COL_WIDTH + x * DATA_COL_WIDTH + (DATA_COL_WIDTH - size.Width) / 2,
@@ -345,6 +340,7 @@ public class SpreadsheetGrid : ScrollView, IDrawable, ISpreadsheetGrid
         String label = (y + 1 + _firstRow).ToString();
         SizeF size = canvas.GetStringSize(label, f, FONT_SIZE + FONT_SIZE * 1.75f);
         canvas.Font = f;
+        canvas.FontColor = Colors.White;
         canvas.FontSize = FONT_SIZE;
         canvas.DrawString(label,
             LABEL_COL_WIDTH - size.Width - PADDING,
@@ -356,7 +352,12 @@ public class SpreadsheetGrid : ScrollView, IDrawable, ISpreadsheetGrid
     public void addHighlightedAddress(string color)
     {
         this.highlightedCells[new Address(_selectedCol, _selectedRow)] = color;
-        //this.highlightedCells.Add(new Address(_selectedCol, _selectedRow), color);
+        Invalidate();
+    }
+
+    public void clearHighlightedAddress()
+    {
+        this.highlightedCells.Remove(new Address(_selectedCol, _selectedRow));
         Invalidate();
     }
 }

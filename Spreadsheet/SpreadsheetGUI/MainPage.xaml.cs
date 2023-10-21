@@ -50,16 +50,30 @@ public partial class MainPage : ContentPage
     {
         spreadsheetGrid.GetSelection(out int col, out int row);
         string cellName = this.ConvertToCellName(col, row);
+        string contents = this.spreadsheet.GetCellContents(cellName).ToString();
+        CellLocation.Text = ConvertToCellName(col, row);
 
-        if (this.spreadsheet.GetCellContents(cellName).ToString() != "")
+        if (contents != "")
         {
-            CellContents.Text = this.spreadsheet.GetCellContents(cellName).ToString();
+            CellContents.Text = contents;
         }
 
         else 
         {
-            CellContents.Text = "Cell Contents";
+            CellContents.Text = "";
 
+        }
+
+        if (this.spreadsheet.GetCellContents(ConvertToCellName(col, row))
+                is Formula)
+        {
+            entryBoxText.Text =
+            "=" + contents;
+
+        }
+        else
+        {
+            entryBoxText.Text = contents;
         }
     }
 
@@ -192,6 +206,11 @@ public partial class MainPage : ContentPage
         this.spreadsheetGrid.addHighlightedAddress("#AEC6CF");
     }
 
+    private void ClearButtonClick(Object sender, EventArgs e)
+    {
+        this.spreadsheetGrid.clearHighlightedAddress();
+    }
+
     private void OnEntryCompleted(object sender, EventArgs e)
     {
         try
@@ -202,26 +221,26 @@ public partial class MainPage : ContentPage
             IList<string> cellsToRecalculate;
 
 
-            if (!(entryBoxText.Text == null))
+            if (entryBoxText.Text != null)
             {
-                spreadsheetGrid.SetValue(col, row, entryBoxText.Text);
+                this.spreadsheetGrid.SetValue(col, row, entryBoxText.Text);
                 cellsToRecalculate = this.spreadsheet.SetContentsOfCell(ConvertToCellName(col, row), entryBoxText.Text);
             }
             else
             {
-                spreadsheetGrid.SetValue(col, row, "");
+                this.spreadsheetGrid.SetValue(col, row, "");
                 cellsToRecalculate = this.spreadsheet.SetContentsOfCell(ConvertToCellName(col, row), "");
 
             }
 
             if (entryBoxText.Text == null)
             {
-                CellContents.Text = "Cell contents";
+                CellContents.Text = "";
             }
 
             else if (entryBoxText.Text == "")
             {
-                CellContents.Text = "Cell contents";
+                CellContents.Text = "";
             }
 
             else
@@ -235,9 +254,20 @@ public partial class MainPage : ContentPage
                 this.spreadsheetGrid.SetValue(colNum, rowNum, this.spreadsheet.GetCellValue(cell).ToString());
             }
 
-            CellLocation.Text = ConvertToCellName(col, row);
-            entryBoxText.Text = null;
+            if (this.spreadsheet.GetCellContents(ConvertToCellName(col, row))
+                is Formula)
+            {
+                entryBoxText.Text =
+                "=" + this.spreadsheet.GetCellContents(ConvertToCellName(col, row)).ToString();
 
+            }
+            else
+            {
+                entryBoxText.Text =
+                    this.spreadsheet.GetCellContents(ConvertToCellName(col, row)).ToString();
+            }
+
+            CellLocation.Text = ConvertToCellName(col, row);
         }
 
         catch (FormulaFormatException ex)

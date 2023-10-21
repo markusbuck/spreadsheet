@@ -3,7 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:SS="clr-namespace:SS"
+             NavigationPage.HasNavigationBar="False"
              x:Class="SpreadsheetGUI.MainPage">
+
     <ContentPage.MenuBarItems>
         <MenuBarItem Text="File">
             <MenuFlyoutItem Text="New" Clicked="NewClicked" />
@@ -11,160 +13,185 @@
             <MenuFlyoutItem Text="Save" Clicked="SaveClicked" />
         </MenuBarItem>
         <MenuBarItem Text="Help">
-             <MenuFlyoutItem Text="Help" Clicked="HelpClicked" />
+            <MenuFlyoutItem Text="Help" Clicked="HelpClicked" />
         </MenuBarItem>
 
     </ContentPage.MenuBarItems>
 
 
 
-    <Grid RowDefinitions="40, *">
+    <Grid RowDefinitions="100, *">
 
-        <HorizontalStackLayout Margin="0"
-                               >
+        <HorizontalStackLayout
+            Margin="0"
+            Background="#43464B">
+
             <!--Box for the name of the cell-->
             <Border
-                 Stroke="#C49B33"
+                    Stroke="RoyalBlue"
                  StrokeThickness="4"
                  Grid.Row="0"
                  Grid.Column="1"
-                
+                 Background="RoyalBlue">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="10,10,10,10" />
+                </Border.StrokeShape>
+                <VerticalStackLayout
+                    Margin="0"
+                    HorizontalOptions="Center"
+                    >
+                    <Label
+                    TextColor="White"
+                    FontSize="24"
+                    Text="Cell Location"
+                    HorizontalOptions="Center"
 
-               StrokeShape="Rectangle 40,0,0,40"
-               Background="White">
-
-                <Label
-
+                    />
+                    <Label
                     x:Name="CellLocation"
-                     TextColor="Black"
-            Grid.Column="0"
-            Grid.Row="0"></Label>
+                    FontSize="24"
+                    TextColor="White"
+                    HorizontalOptions="Center"
+                    />
 
+                    <!--Box for the contents of the cell-->
+                </VerticalStackLayout>
             </Border>
 
-            <!--Box for the contents of the cell-->
             <Border
-                 Stroke="#C49B33"
+                    Stroke="RoyalBlue"
                  StrokeThickness="4"
                  Grid.Row="0"
                  Grid.Column="1"
-                
+                 Background="RoyalBlue">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="10,10,10,10" />
+                </Border.StrokeShape>
+                <VerticalStackLayout
+                    Margin="0"
+                    HorizontalOptions="Center"
+                    >
+                    <Label
+                        TextColor="White"
+                        Text="Cell Contents"
+                        FontSize="24"
+                        HorizontalOptions="Center"
 
-               StrokeShape="Rectangle 40,0,0,40"
-               Background="White">
+                    />
+                    <Label
+                        x:Name="CellContents"
+                        TextColor="White"
+                        FontSize="24"
+                        HorizontalOptions="Center"
+                    />
 
-                <Label
-                    Text="Cell contents"
-                    x:Name="CellContents"
-                    TextColor="Black"
-                    Grid.Column="1"
-                    Grid.Row="0">
-                </Label>
-
+                </VerticalStackLayout>
             </Border>
 
             <!--Entry box-->
             <Border
-               Stroke="#C49B33"
+               Stroke="RoyalBlue"
                StrokeThickness="4"
                Grid.Row="0"
                Grid.Column="2"
-
-
-               StrokeShape="Rectangle 40,0,0,40"
-               Background="White"
+               Background="RoyalBlue"
                Padding="16,8"
-               x:Name="inputBox"
-              
-               >
+               MinimumWidthRequest="500"
+               x:Name="inputBox">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="10,10,10,10" />
+                </Border.StrokeShape>
 
                 <Entry
                 x:Name="entryBoxText"
-                TextColor="Black"
+                TextColor="White"
+                FontSize="24"
+                PlaceholderColor="White"
                 Placeholder="Enter text"
-                Completed="OnEntryCompleted"
-    
-           />
+                Completed="OnEntryCompleted"/>
             </Border>
 
-            <!--Button for the yellow highlight-->
             <Border
-                   Stroke="#C49B33"
+                   Stroke="#43464B"
                StrokeThickness="4"
-               Grid.Row="0"
-               Grid.Column="2"
+               Grid.Row="9"
+               Grid.Column="10"
 
 
                StrokeShape="Rectangle 40,0,0,40"
-               Background="White"
-               Padding="16,8"
-               x:Name="yellowHighlightBox">
-
-                 <Button
-                    Text="Yellow Highlight"
-                    x:Name="yellowHighlight"
-                    TextColor="Black"
-                    Grid.Column="3"
-                    Grid.Row="0"
-                     Clicked="YellowHighlightButtonClick">
-                </Button>
+               Background="#43464B"
+               Padding="16,8">  
             </Border>
 
-              <!--Button for the red highlight-->
             <Border
-                   Stroke="#C49B33"
-               StrokeThickness="4"
-               Grid.Row="0"
-               Grid.Column="2"
+                    Stroke="RoyalBlue"
+                 StrokeThickness="4"
+                 Grid.Row="0"
+                 Grid.Column="1"
+                 Background="RoyalBlue">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="10,10,10,10" />
+                </Border.StrokeShape>
+                <VerticalStackLayout
+                    Margin="0"
+                    HorizontalOptions="Center"
+                    >
+                    <Label
+                        TextColor="White"
+                        Text="Highlight Cell:"
+                        FontSize="24"
+                        HorizontalOptions="Center"
 
+                    />
+                    <HorizontalStackLayout
+                        Margin="10"
+                        Spacing="5"
+                        Background="RoyalBlue">
 
-               StrokeShape="Rectangle 40,0,0,40"
-               Background="White"
-               Padding="16,8"
-               x:Name="redHighlightBox">
+                        <!--Button for the yellow-->
+                        <Button
+                            x:Name="yellowHighlight"
+                            BackgroundColor="Yellow"
+                            Grid.Column="2"
+                            Grid.Row="0"
+                            Clicked="YellowHighlightButtonClick">
+                        </Button>
 
-                 <Button
-                    Text="Red Highlight"
-                    x:Name="redHighlight"
-                    TextColor="Black"
-                    Grid.Column="3"
-                    Grid.Row="0"
-                     Clicked="RedHighlightButtonClick">
-                </Button>
+                        <!--Button for the red highlight-->
+                        <Button
+                            x:Name="redHighlight"
+                            BackgroundColor="Red"
+                            Grid.Column="2"
+                            Grid.Row="0"
+                            Clicked="RedHighlightButtonClick">
+                        </Button>
+
+                         <!--Button for the blue highlight-->
+                         <Button
+                            x:Name="blueHighlight"
+                            BackgroundColor="Blue"
+                            Grid.Column="2"
+                            Grid.Row="0"
+                            Clicked="BlueHighlightButtonClick">
+                          </Button>
+
+                        <!--Button for the clear highlight-->
+                        <Button
+                            x:Name="clear"
+                            BackgroundColor="White"
+                            Grid.Column="2"
+                            Grid.Row="0"
+                            Clicked="ClearButtonClick">
+                          </Button>
+                    </HorizontalStackLayout>
+
+                </VerticalStackLayout>
             </Border>
-
-                 <!--Button for the blue highlight-->
-            <Border
-                   Stroke="#C49B33"
-               StrokeThickness="4"
-               Grid.Row="0"
-               Grid.Column="2"
-
-
-               StrokeShape="Rectangle 40,0,0,40"
-               Background="White"
-               Padding="16,8"
-               x:Name="blueHighlightBox">
-
-                 <Button
-                    Text="Blue Highlight"
-                    x:Name="blueHighlight"
-                    TextColor="Black"
-                    Grid.Column="3"
-                    Grid.Row="0"
-                     Clicked="BlueHighlightButtonClick">
-                </Button>
-            </Border>
-
         </HorizontalStackLayout>
 
 
         <SS:SpreadsheetGrid x:Name="spreadsheetGrid"
                             Grid.Row="2"/>
-
-
-
-
 
     </Grid>
 
