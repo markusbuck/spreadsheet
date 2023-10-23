@@ -75,7 +75,6 @@ public class Spreadsheet : AbstractSpreadsheet
         Relationships = new DependencyGraph();
         Validate = isValid;
         Normalizer = normalize;
-        Changed = false;
         if (!File.Exists(filename))
         {
             throw new SpreadsheetReadWriteException("File provided does not exist");
@@ -98,6 +97,7 @@ public class Spreadsheet : AbstractSpreadsheet
                     SetContentsOfCell(cell, sheet.Cells[cell].StringForm);
                 }
             }
+            Changed = false;
         }
         catch
         {
@@ -163,12 +163,13 @@ public class Spreadsheet : AbstractSpreadsheet
 
 
             File.WriteAllText(filename, jsonString);
+            Changed = false;
         }
         catch
         {
             throw new SpreadsheetReadWriteException("Cannot Save to invalid path");
         }
-        Changed = false;
+        
     }
 
     protected override IList<string> SetCellContents(string name, double number)

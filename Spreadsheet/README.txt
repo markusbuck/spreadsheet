@@ -24,5 +24,6 @@ Problems: Highlight was not working properly and not highlighting the right colo
 10/21/23 - Reformatted the GUI and changed the look of the GUI. Changed the look of the
 highlight button.
 
-10/23/23 - Added a help page. 
+10/23/23 - Added a help page. Fixed bugs when opening the a saved spreadsheet file. Needed
+to reset everything to make it like opening a new file.
 
