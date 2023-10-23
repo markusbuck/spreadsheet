@@ -159,7 +159,7 @@ public partial class MainPage : ContentPage
                     foreach (string cell in this.spreadsheet.GetNamesOfAllNonemptyCells())
                     {
 
-                        string cellContents = this.spreadsheet.GetCellContents(cell).ToString();
+                        string cellContents = this.spreadsheet.GetCellValue(cell).ToString();
                         this.ConvertToCellNameToRowCol(cell, out int col, out int row);
                         this.spreadsheetGrid.SetValue(col, row, cellContents);
                     }

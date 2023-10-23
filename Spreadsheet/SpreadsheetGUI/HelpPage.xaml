@@ -23,7 +23,6 @@
                     Text="CELL ENTRY AND SELECTION: "
                     /> 
                 <Label
-                    x:Name="CellEntry"
                     Text="To Select a cell simply click on the desired cell in the grid. Clicking in the text entry box, typing, then pressing the 'ENTER' key will put the entry into a cell."
                     VerticalOptions="Center" 
                     HorizontalOptions="Center" />
@@ -39,7 +38,6 @@
                     Text="CELL HIGHLIGHT: "
                     /> 
                 <Label
-                    x:Name="CellEntry"
                     Text="To highligh a cell click on the desired cell in the grid. Clicking on the desired color of the Highlight Cell button will highlight that cell."
                     VerticalOptions="Center" 
                     HorizontalOptions="Center" />
