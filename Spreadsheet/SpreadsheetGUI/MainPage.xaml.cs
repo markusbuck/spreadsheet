@@ -188,7 +188,7 @@ public partial class MainPage : ContentPage
 
     private void HelpClicked(Object sender, EventArgs e)
     {
-        DisplayAlert("Help", "Msdslkdfjskfslkjfksjdfsldfjskdjfslkjfsl", "OK");
+        Navigation.PushAsync(new HelpPage());
     }
 
     private void YellowHighlightButtonClick(Object sender, EventArgs e)

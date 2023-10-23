@@ -55,4 +55,8 @@
 	<ItemGroup>
 	  <PackageReference Include="CommunityToolkit.Maui" Version="6.0.0" />
 	</ItemGroup>
+	<ItemGroup>
+	  <None Remove="Resources\Images\CellEntry.PNG" />
+	  <None Remove="Resources\Images\HighlightCell.PNG" />
+	</ItemGroup>
 </Project>

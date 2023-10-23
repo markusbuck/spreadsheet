@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="SpreadsheetGUI.HelpPage"
+             BackgroundColor="#43464B"
+             Title="Help">
+    <ScrollView Margin="20">
+    <VerticalStackLayout>
+        <Label
+            x:Name="HelpType"
+            FontSize="24"
+            Text="Spreadsheet Help"
+            VerticalOptions="Center" 
+            HorizontalOptions="Center" />
+
+        <Image
+            Source="cell_entry.png"
+    
+               />
+        <HorizontalStackLayout>
+                <Label
+                    FontSize="20"
+                    Text="CELL ENTRY AND SELECTION: "
+                    /> 
+                <Label
+                    x:Name="CellEntry"
+                    Text="To Select a cell simply click on the desired cell in the grid. Clicking in the text entry box, typing, then pressing the 'ENTER' key will put the entry into a cell."
+                    VerticalOptions="Center" 
+                    HorizontalOptions="Center" />
+            </HorizontalStackLayout>
+        <Image
+            Source="highlight_cell.png"
+            Aspect="AspectFit"
+               />
+
+            <HorizontalStackLayout>
+                <Label
+                    FontSize="20"
+                    Text="CELL HIGHLIGHT: "
+                    /> 
+                <Label
+                    x:Name="CellEntry"
+                    Text="To highligh a cell click on the desired cell in the grid. Clicking on the desired color of the Highlight Cell button will highlight that cell."
+                    VerticalOptions="Center" 
+                    HorizontalOptions="Center" />
+            </HorizontalStackLayout>
+
+    </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
