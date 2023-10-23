@@ -156,6 +156,8 @@ public partial class MainPage : ContentPage
                     }, x => x.ToUpper(), "ps6");
 
 
+                    this.spreadsheetGrid.Clear();
+
                     foreach (string cell in this.spreadsheet.GetNamesOfAllNonemptyCells())
                     {
 
@@ -163,7 +165,24 @@ public partial class MainPage : ContentPage
                         this.ConvertToCellNameToRowCol(cell, out int col, out int row);
                         this.spreadsheetGrid.SetValue(col, row, cellContents);
                     }
-                    
+
+                    spreadsheetGrid.SetSelection(0, 0);
+                    CellLocation.Text = ConvertToCellName(0, 0);
+                    if (this.spreadsheet.GetCellContents(ConvertToCellName(0, 0))
+                        is Formula)
+                    {
+                        entryBoxText.Text =
+                        "=" + this.spreadsheet.GetCellContents(ConvertToCellName(0, 0)).ToString();
+
+                    }
+                    else
+                    {
+                        entryBoxText.Text =
+                            this.spreadsheet.GetCellContents(ConvertToCellName(0, 0)).ToString();
+                    }
+                    CellContents.Text =
+                            this.spreadsheet.GetCellContents(ConvertToCellName(0, 0)).ToString();
+
 
                 }
                 else
