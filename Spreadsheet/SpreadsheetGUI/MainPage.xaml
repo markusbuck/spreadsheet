@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:SS="clr-namespace:SS"
-             NavigationPage.HasNavigationBar="False"
+             NavigationPage.HasNavigationBar="True"
              x:Class="SpreadsheetGUI.MainPage">
 
     <ContentPage.MenuBarItems>
